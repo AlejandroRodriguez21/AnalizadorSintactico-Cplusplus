@@ -1,0 +1,16 @@
+Dependencias del proyecto (binarios sin modificar, obtenidos de Maven Central).
+No es necesario descargarlas otra vez para compilar este proyecto.
+
+java-cup-11b.jar
+  com.github.vbmacher:java-cup:11b-20160615-3
+java-cup-11b-runtime.jar
+  com.github.vbmacher:java-cup-runtime:11b-20160615-3
+  Proyecto Java CUP: https://www2.cs.tum.edu/projects/cup/
+
+jflex-1.9.1.jar
+  de.jflex:jflex:1.9.1
+  Proyecto JFlex: https://jflex.de/
+  Aviso de licencia en LICENSE_JFLEX.txt y dentro del JAR.
+
+Estas dependencias reemplazan las rutas locales externas y duplicadas del
+archivo original. No agregan nuevas reglas al analizador.

@@ -1,0 +1,350 @@
+/* CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO */
+
+package ManejoErrores;
+
+import java_cup.runtime.*;
+
+parser code {:
+    private int erroresSintacticos = 0;
+    private boolean errorFatal = false;
+    private int etapa = 0;
+    private String contexto = "estructura del archivo";
+    private Symbol ultimoError;
+
+    public int getErroresSintacticos() {
+        return erroresSintacticos;
+    }
+
+    public boolean huboErrorFatal() {
+        return errorFatal;
+    }
+
+    private void actualizarContexto() {
+        for (Object elemento : stack) {
+            Symbol s = (Symbol) elemento;
+
+            if (s.sym == sym.USING && "using".equals(s.value)) {
+                etapa = 1;
+                contexto = "directiva using namespace";
+
+            } else if (s.sym == sym.IMPORT && "import".equals(s.value)) {
+                etapa = 2;
+                contexto = "importación";
+
+            } else if (s.sym == sym.CLASS && "class".equals(s.value)) {
+                etapa = 3;
+                contexto = "clase principal";
+            }
+        }
+    }
+
+    public void faltaPuntoComa(String estructura) {
+        report_error(
+            "Falta ';' al terminar " + estructura + ".",
+            cur_token
+        );
+
+        recuperacion(
+            "Se conserva la siguiente estructura como punto de continuación."
+        );
+    }
+
+    public void regla(String nombre, int linea) {
+        System.out.println(
+            "Regla reconocida: " + nombre
+            + " | Línea: " + (linea + 1)
+        );
+    }
+
+    public void recuperacion(String descripcion) {
+        System.out.println(
+            "Recuperación: " + descripcion
+            + " Se continúa el análisis."
+        );
+    }
+
+    private String esperado(int token) {
+        switch (token) {
+            case sym.IDENTIFICADOR:
+                return "identificador válido";
+            case sym.NAMESPACE:
+                return "'namespace'";
+            case sym.PUNTO_COMA:
+                return "';'";
+            case sym.LLAVE_A:
+                return "'{'";
+            case sym.LLAVE_C:
+                return "'}'";
+            case sym.CLASS:
+                return "'class'";
+            case sym.IMPORT:
+                return "'import'";
+            case sym.USING:
+                return "'using'";
+            case sym.STD:
+                return "'std'";
+            case sym.DOS_PUNTOS:
+                return "'::'";
+            case sym.PUNTO:
+                return "'.'";
+            case sym.EOF:
+                return "fin del archivo";
+            default:
+                return sym.terminalNames[token];
+        }
+    }
+
+    private String descripcion() {
+        StringBuilder texto =
+            new StringBuilder("Estructura incorrecta en ")
+                .append(contexto);
+
+        java.util.List<Integer> tokens = expected_token_ids();
+        boolean primero = true;
+
+        for (int token : tokens) {
+            if (token == sym.error) {
+                continue;
+            }
+
+            texto.append(primero ? "; se esperaba " : " o ")
+                 .append(esperado(token));
+
+            primero = false;
+        }
+
+        return texto.append('.').toString();
+    }
+
+    private void imprimirError(
+        String tipo,
+        String mensaje,
+        Object info
+    ) {
+        Symbol s = info instanceof Symbol
+            ? (Symbol) info
+            : ultimoError;
+
+        if (s == null) {
+            s = cur_token;
+        }
+
+        String token = s.sym == sym.EOF
+            ? "FIN_DE_ARCHIVO"
+            : String.valueOf(s.value);
+
+        System.err.println(
+            tipo
+            + " en línea " + (s.left + 1)
+            + ", columna " + (s.right + 1)
+            + ": se encontró '" + token + "'. "
+            + mensaje
+        );
+    }
+
+    @Override
+    public void report_error(String message, Object info) {
+        erroresSintacticos++;
+        imprimirError("Error sintactico", message, info);
+    }
+
+    @Override
+    public void report_fatal_error(String message, Object info) {
+        errorFatal = true;
+
+        imprimirError("Error fatal", message, info);
+
+        done_parsing();
+
+        throw new IllegalStateException(
+            "Análisis detenido por error fatal."
+        );
+    }
+
+    @Override
+    public void syntax_error(Symbol token) {
+        actualizarContexto();
+        ultimoError = token;
+
+        java.util.List<Integer> esperados = expected_token_ids();
+
+        if (
+            (
+                etapa >= 3
+                && (
+                    token.sym == sym.IMPORT
+                    || token.sym == sym.USING
+                    || token.sym == sym.CLASS
+                )
+            )
+            || (etapa >= 1 && token.sym == sym.USING)
+            || (
+                esperados.size() == 1
+                && esperados.contains(sym.EOF)
+            )
+        ) {
+            report_fatal_error(
+                "Orden estructural inválido: la directiva inicial y las "
+                + "importaciones deben preceder a la única clase principal.",
+                token
+            );
+        }
+
+        report_error(descripcion(), token);
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol token)
+        throws Exception {
+
+        report_fatal_error(
+            "No existe un punto de recuperación que permita completar "
+            + "la estructura del archivo.",
+            ultimoError != null ? ultimoError : token
+        );
+    }
+
+    @Override
+    protected int error_sync_size() {
+        return 1;
+    }
+:};
+
+/* Tokens léxicos conservados de las actividades anteriores. */
+
+terminal INT, FLOAT, DOUBLE, CHAR, VOID, BOOL, LONG, SHORT, STRING;
+
+terminal IF, ELSE, SWITCH, CASE, DEFAULT, FOR, WHILE, DO, BREAK, CONTINUE;
+
+terminal CLASS, STRUCT, PUBLIC, PRIVATE, PROTECTED, THIS, NEW, DELETE,
+         RETURN, USING, NAMESPACE, STD, COUT, CIN, ENDL, IMPORT;
+
+terminal IGUAL_IGUAL, DISTINTO, MAYOR_IGUAL, MENOR_IGUAL, AND, OR, NOT;
+
+terminal MAS, MENOS, POR, ENTRE, MODULO, IGUAL, MENOR, MAYOR,
+         MENOR_MENOR, MAYOR_MAYOR;
+
+terminal PUNTO_COMA, COMA, PUNTO, DOS_PUNTOS,
+         PARENTESIS_A, PARENTESIS_C,
+         CORCHETE_A, CORCHETE_C,
+         LLAVE_A, LLAVE_C;
+
+terminal String IDENTIFICADOR, CADENA;
+terminal Integer ENTERO;
+terminal Double DECIMAL;
+
+non terminal archivo, directiva_opcional, directiva;
+non terminal lista_importaciones, importacion, clase_principal;
+non terminal ruta_namespace, nombre_namespace, ruta_modulo;
+
+start with archivo;
+
+/* Estructura del subconjunto utilizado en la práctica. */
+
+archivo ::=
+    directiva_opcional lista_importaciones clase_principal
+    ;
+
+directiva_opcional ::=
+    directiva
+    |
+    ;
+
+/* Directiva inicial opcional. */
+
+directiva ::=
+    USING:u NAMESPACE ruta_namespace PUNTO_COMA
+    {:
+        parser.regla("directiva using namespace", uleft);
+    :}
+    |
+    USING NAMESPACE ruta_namespace
+    {:
+        parser.faltaPuntoComa("la directiva using namespace");
+    :}
+    |
+    USING error PUNTO_COMA
+    {:
+        parser.recuperacion(
+            "Se omite la directiva using namespace con ruta "
+            + "o estructura inválida hasta ';'."
+        );
+    :}
+    ;
+
+ruta_namespace ::=
+    nombre_namespace
+    |
+    ruta_namespace DOS_PUNTOS nombre_namespace
+    ;
+
+nombre_namespace ::=
+    IDENTIFICADOR
+    |
+    STD
+    ;
+
+/* Cero o más importaciones antes de la clase. */
+
+lista_importaciones ::=
+    lista_importaciones importacion
+    |
+    ;
+
+importacion ::=
+    IMPORT:i ruta_modulo PUNTO_COMA
+    {:
+        parser.regla("importación", ileft);
+    :}
+    |
+    IMPORT ruta_modulo
+    {:
+        parser.faltaPuntoComa("la importación");
+    :}
+    |
+    IMPORT error PUNTO_COMA
+    {:
+        parser.recuperacion(
+            "Se omite la importación con ruta inválida hasta ';'."
+        );
+    :}
+    ;
+
+ruta_modulo ::=
+    IDENTIFICADOR
+    |
+    STD
+    |
+    ruta_modulo PUNTO IDENTIFICADOR
+    ;
+
+/* Actividad 4: únicamente clase vacía, terminada en }; */
+
+clase_principal ::=
+    CLASS:c IDENTIFICADOR LLAVE_A LLAVE_C PUNTO_COMA
+    {:
+        parser.regla("clase principal", cleft);
+        parser.regla("estructura de llaves válida", cleft);
+    :}
+    |
+    CLASS:c error LLAVE_A LLAVE_C PUNTO_COMA
+    {:
+        parser.recuperacion(
+            "Se omite la clase sin nombre válido."
+        );
+    :}
+    |
+    CLASS:c IDENTIFICADOR error PUNTO_COMA
+    {:
+        parser.recuperacion(
+            "Se omite la clase con delimitadores incorrectos hasta ';'."
+        );
+    :}
+    |
+    CLASS:c IDENTIFICADOR LLAVE_A error LLAVE_C PUNTO_COMA
+    {:
+        parser.recuperacion(
+            "Se omite la estructura inválida entre las llaves de la clase."
+        );
+    :}
+    ;
