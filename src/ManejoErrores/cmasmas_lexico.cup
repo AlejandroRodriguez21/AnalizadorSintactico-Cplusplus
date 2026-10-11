@@ -29,7 +29,7 @@ parser code {:
 
             } else if (s.sym == sym.IMPORT && "import".equals(s.value)) {
                 etapa = 2;
-                contexto = "importación";
+                contexto = "importacion";
 
             } else if (s.sym == sym.CLASS && "class".equals(s.value)) {
                 etapa = 3;
@@ -45,28 +45,28 @@ parser code {:
         );
 
         recuperacion(
-            "Se conserva la siguiente estructura como punto de continuación."
+            "Se conserva la siguiente estructura como punto de continuacion."
         );
     }
 
     public void regla(String nombre, int linea) {
         System.out.println(
             "Regla reconocida: " + nombre
-            + " | Línea: " + (linea + 1)
+            + " | Linea: " + (linea + 1)
         );
     }
 
     public void recuperacion(String descripcion) {
         System.out.println(
-            "Recuperación: " + descripcion
-            + " Se continúa el análisis."
+            "Recuperacion: " + descripcion
+            + " Se continua el analisis."
         );
     }
 
     private String esperado(int token) {
         switch (token) {
             case sym.IDENTIFICADOR:
-                return "identificador válido";
+                return "identificador valido";
             case sym.NAMESPACE:
                 return "'namespace'";
             case sym.PUNTO_COMA:
@@ -135,9 +135,9 @@ parser code {:
 
         System.err.println(
             tipo
-            + " en línea " + (s.left + 1)
+            + " en linea " + (s.left + 1)
             + ", columna " + (s.right + 1)
-            + ": se encontró '" + token + "'. "
+            + ": se encontro '" + token + "'. "
             + mensaje
         );
     }
@@ -157,7 +157,7 @@ parser code {:
         done_parsing();
 
         throw new IllegalStateException(
-            "Análisis detenido por error fatal."
+            "Analisis detenido por error fatal."
         );
     }
 
@@ -184,8 +184,8 @@ parser code {:
             )
         ) {
             report_fatal_error(
-                "Orden estructural inválido: la directiva inicial y las "
-                + "importaciones deben preceder a la única clase principal.",
+                "Orden estructural invalido: la directiva inicial y las "
+                + "importaciones deben preceder a la unica clase principal.",
                 token
             );
         }
@@ -198,7 +198,7 @@ parser code {:
         throws Exception {
 
         report_fatal_error(
-            "No existe un punto de recuperación que permita completar "
+            "No existe un punto de recuperacion que permita completar "
             + "la estructura del archivo.",
             ultimoError != null ? ultimoError : token
         );
@@ -267,7 +267,7 @@ directiva ::=
     {:
         parser.recuperacion(
             "Se omite la directiva using namespace con ruta "
-            + "o estructura inválida hasta ';'."
+            + "o estructura invalida hasta ';'."
         );
     :}
     ;
@@ -294,18 +294,18 @@ lista_importaciones ::=
 importacion ::=
     IMPORT:i ruta_modulo PUNTO_COMA
     {:
-        parser.regla("importación", ileft);
+        parser.regla("importacion", ileft);
     :}
     |
     IMPORT ruta_modulo
     {:
-        parser.faltaPuntoComa("la importación");
+        parser.faltaPuntoComa("la importacion");
     :}
     |
     IMPORT error PUNTO_COMA
     {:
         parser.recuperacion(
-            "Se omite la importación con ruta inválida hasta ';'."
+            "Se omite la importacion con ruta invalida hasta ';'."
         );
     :}
     ;
@@ -324,13 +324,13 @@ clase_principal ::=
     CLASS:c IDENTIFICADOR LLAVE_A LLAVE_C PUNTO_COMA
     {:
         parser.regla("clase principal", cleft);
-        parser.regla("estructura de llaves válida", cleft);
+        parser.regla("estructura de llaves valida", cleft);
     :}
     |
     CLASS:c error LLAVE_A LLAVE_C PUNTO_COMA
     {:
         parser.recuperacion(
-            "Se omite la clase sin nombre válido."
+            "Se omite la clase sin nombre valido."
         );
     :}
     |
@@ -344,7 +344,7 @@ clase_principal ::=
     CLASS:c IDENTIFICADOR LLAVE_A error LLAVE_C PUNTO_COMA
     {:
         parser.recuperacion(
-            "Se omite la estructura inválida entre las llaves de la clase."
+            "Se omite la estructura invalida entre las llaves de la clase."
         );
     :}
     ;

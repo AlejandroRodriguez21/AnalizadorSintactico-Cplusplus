@@ -16,8 +16,8 @@ public class AnalizadorLexico {
         );
 
         
-    //  String rutaPrueba = "prueba_valida.txt";
-        String rutaPrueba = "prueba_errores.txt";
+      String rutaPrueba = "prueba_valida.txt";
+    //    String rutaPrueba = "prueba_errores.txt";
 
         try (
             Reader lector =

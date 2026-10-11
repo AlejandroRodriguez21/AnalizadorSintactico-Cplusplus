@@ -157,7 +157,7 @@ public class ParserJava extends java_cup.runtime.lr_parser {
 
             } else if (s.sym == sym.IMPORT && "import".equals(s.value)) {
                 etapa = 2;
-                contexto = "importación";
+                contexto = "importacion";
 
             } else if (s.sym == sym.CLASS && "class".equals(s.value)) {
                 etapa = 3;
@@ -173,28 +173,28 @@ public class ParserJava extends java_cup.runtime.lr_parser {
         );
 
         recuperacion(
-            "Se conserva la siguiente estructura como punto de continuación."
+            "Se conserva la siguiente estructura como punto de continuacion."
         );
     }
 
     public void regla(String nombre, int linea) {
         System.out.println(
             "Regla reconocida: " + nombre
-            + " | Línea: " + (linea + 1)
+            + " | Linea: " + (linea + 1)
         );
     }
 
     public void recuperacion(String descripcion) {
         System.out.println(
-            "Recuperación: " + descripcion
-            + " Se continúa el análisis."
+            "Recuperacion: " + descripcion
+            + " Se continua el analisis."
         );
     }
 
     private String esperado(int token) {
         switch (token) {
             case sym.IDENTIFICADOR:
-                return "identificador válido";
+                return "identificador valido";
             case sym.NAMESPACE:
                 return "'namespace'";
             case sym.PUNTO_COMA:
@@ -263,9 +263,9 @@ public class ParserJava extends java_cup.runtime.lr_parser {
 
         System.err.println(
             tipo
-            + " en línea " + (s.left + 1)
+            + " en linea " + (s.left + 1)
             + ", columna " + (s.right + 1)
-            + ": se encontró '" + token + "'. "
+            + ": se encontro '" + token + "'. "
             + mensaje
         );
     }
@@ -285,7 +285,7 @@ public class ParserJava extends java_cup.runtime.lr_parser {
         done_parsing();
 
         throw new IllegalStateException(
-            "Análisis detenido por error fatal."
+            "Analisis detenido por error fatal."
         );
     }
 
@@ -312,8 +312,8 @@ public class ParserJava extends java_cup.runtime.lr_parser {
             )
         ) {
             report_fatal_error(
-                "Orden estructural inválido: la directiva inicial y las "
-                + "importaciones deben preceder a la única clase principal.",
+                "Orden estructural invalido: la directiva inicial y las "
+                + "importaciones deben preceder a la unica clase principal.",
                 token
             );
         }
@@ -326,7 +326,7 @@ public class ParserJava extends java_cup.runtime.lr_parser {
         throws Exception {
 
         report_fatal_error(
-            "No existe un punto de recuperación que permita completar "
+            "No existe un punto de recuperacion que permita completar "
             + "la estructura del archivo.",
             ultimoError != null ? ultimoError : token
         );
@@ -435,7 +435,7 @@ class CUP$ParserJava$actions {
 		
         parser.recuperacion(
             "Se omite la directiva using namespace con ruta "
-            + "o estructura inválida hasta ';'."
+            + "o estructura invalida hasta ';'."
         );
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
@@ -504,7 +504,7 @@ class CUP$ParserJava$actions {
 		int iright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)).value;
 		
-        parser.regla("importación", ileft);
+        parser.regla("importacion", ileft);
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
@@ -515,7 +515,7 @@ class CUP$ParserJava$actions {
             {
               Object RESULT =null;
 		
-        parser.faltaPuntoComa("la importación");
+        parser.faltaPuntoComa("la importacion");
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
@@ -527,7 +527,7 @@ class CUP$ParserJava$actions {
               Object RESULT =null;
 		
         parser.recuperacion(
-            "Se omite la importación con ruta inválida hasta ';'."
+            "Se omite la importacion con ruta invalida hasta ';'."
         );
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
@@ -570,7 +570,7 @@ class CUP$ParserJava$actions {
 		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).value;
 		
         parser.regla("clase principal", cleft);
-        parser.regla("estructura de llaves válida", cleft);
+        parser.regla("estructura de llaves valida", cleft);
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
@@ -585,7 +585,7 @@ class CUP$ParserJava$actions {
 		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).value;
 		
         parser.recuperacion(
-            "Se omite la clase sin nombre válido."
+            "Se omite la clase sin nombre valido."
         );
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
@@ -617,7 +617,7 @@ class CUP$ParserJava$actions {
 		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)).value;
 		
         parser.recuperacion(
-            "Se omite la estructura inválida entre las llaves de la clase."
+            "Se omite la estructura invalida entre las llaves de la clase."
         );
     
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
