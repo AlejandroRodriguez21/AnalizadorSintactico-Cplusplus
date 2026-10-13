@@ -1,10 +1,29 @@
 class Principal {
     void proceso() {
-        leer(a b);
-        escribir("Inicio"
-        total = a+;
-        resultado = a + b;
-        leer(a,,b);
-        escribir(,a);
+        si edad >= 18 {
+            escribir("Mayor");
+        }
+
+        mientras (contador < 10 {
+            contador = contador + 1;
+        }
+
+        si (activo) {
+            escribir("Activo");
+        
+
+        sino {
+            escribir("Inactivo");
+        }
+
+        para (int i=0; i < 10;) {
+            escribir(i);
+        }
+
+        segun (opcion) {
+            caso:
+                escribir("Opcion");
+                romper;
+        }
     }
 }

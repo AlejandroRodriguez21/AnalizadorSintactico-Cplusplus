@@ -5,35 +5,22 @@ import java_cup.runtime.*;
 parser code {:
     @Override
     public void report_error(String message, Object info) {
-        StringBuilder m = new StringBuilder("Error sintactico");
         if (info instanceof java_cup.runtime.Symbol) {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
-            if (s.left >= 0) {
-                m.append(" en linea ").append(s.left + 1);
-                if (s.right >= 0) m.append(", columna ").append(s.right + 1);
+            if (s.sym != sym.error) {
+                System.err.println("Error sintactico en linea " + (s.left + 1) + ", columna " + (s.right + 1) + ": token inesperado '" + s.value + "'");
             }
-            m.append(": se encontro '").append(s.value != null ? s.value : "TOKEN_DESCONOCIDO").append("'");
         }
-        System.err.println(m.toString());
     }
 
     @Override
     public void report_fatal_error(String message, Object info) {
-        StringBuilder m = new StringBuilder("Error fatal");
-        if (info instanceof java_cup.runtime.Symbol) {
-            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
-            if (s.left >= 0) {
-                m.append(" en linea ").append(s.left + 1);
-                if (s.right >= 0) m.append(", columna ").append(s.right + 1);
-            }
-            m.append(": se encontro '").append(s.value != null ? s.value : "TOKEN_DESCONOCIDO").append("'");
-        }
-        System.err.println(m.toString());
+        System.err.println("Error fatal irrecuperable. Abortando.");
         System.exit(1);
     }
 :};
 
-/* TIPOS DE DATO */
+/* TERMINALES */
 terminal INT, FLOAT, DOUBLE, CHAR, VOID, BOOL, LONG, SHORT, STRING;
 terminal IF, ELSE, SWITCH, CASE, DEFAULT, FOR, WHILE, DO, BREAK, CONTINUE;
 terminal CLASS, STRUCT, PUBLIC, PRIVATE, PROTECTED, THIS, NEW, DELETE, RETURN, USING, NAMESPACE, STD, COUT, CIN, ENDL, IMPORT, CONST;
@@ -41,8 +28,6 @@ terminal LEER, ESCRIBIR;
 terminal IGUAL_IGUAL, DISTINTO, MAYOR_IGUAL, MENOR_IGUAL, AND, OR, NOT;
 terminal MAS, MENOS, POR, ENTRE, MODULO, IGUAL, MENOR, MAYOR, MENOR_MENOR, MAYOR_MAYOR;
 terminal PUNTO_COMA, COMA, PUNTO, DOS_PUNTOS, PARENTESIS_A, PARENTESIS_C, CORCHETE_A, CORCHETE_C, LLAVE_A, LLAVE_C;
-
-/* IDENTIFICADORES Y VALORES DE C++ */
 terminal String IDENTIFICADOR, CADENA;
 terminal Integer ENTERO;
 terminal Double DECIMAL;
@@ -50,139 +35,133 @@ terminal TRUE, FALSE;
 
 /* NO TERMINALES ESTRUCTURA BASE */
 non terminal archivo, paquete_opcional, lista_importaciones, importacion, clase_principal;
-
-/* NO TERMINALES CLASE Y METODOS */
 non terminal cuerpo_clase, lista_elementos_clase, elemento_clase;
 non terminal atributo_variable, constante, metodo_dummy;
 non terminal tipo_dato, valor, lista_identificadores;
 
-/* NO TERMINALES ACTIVIDAD 6 (EXPRESIONES Y SENTENCIAS) */
-non terminal lista_sentencias, sentencia;
-non terminal lectura, escritura, asignacion, lista_elementos, expresion;
+/* NO TERMINALES ACTIVIDAD 6 Y 7 */
+non terminal lista_sentencias, sentencia, bloque;
+non terminal lectura, escritura, asignacion, lista_elementos, expresion, condicion;
+non terminal estructura_control, seleccion_simple, seleccion_doble, seleccion_multiple, lista_casos, caso, defecto;
+non terminal ciclo_mientras, ciclo_hacer_mientras, ciclo_para, actualizacion_para, dec_var_local;
 
-/* PRECEDENCIA DE OPERADORES (JERARQUIA MATEMATICA Y LOGICA) */
+/* PRECEDENCIA Y ASOCIATIVIDAD */
+precedence right IGUAL;
 precedence left OR;
 precedence left AND;
 precedence left IGUAL_IGUAL, DISTINTO, MAYOR, MENOR, MAYOR_IGUAL, MENOR_IGUAL;
 precedence left MAS, MENOS;
 precedence left POR, ENTRE, MODULO;
 precedence right NOT;
+precedence left ELSE; 
 
 start with archivo;
 
 archivo ::= paquete_opcional lista_importaciones clase_principal
-          {: System.out.println("Analisis sintactico finalizado correctamente"); :} 
-        ;
+          {: System.out.println("Analisis sintactico finalizado correctamente"); :} ;
 
-paquete_opcional ::= USING NAMESPACE IDENTIFICADOR PUNTO_COMA 
-                 | USING NAMESPACE STD PUNTO_COMA 
-                 | USING error PUNTO_COMA 
-                   {: System.err.println("-> Recuperacion: Se omitio paquete invalido."); :}
-                 | /* vacio */
-                 ;
-
-lista_importaciones ::= lista_importaciones importacion
-                      | /* vacio */
-                      ;
-
-importacion ::= IMPORT IDENTIFICADOR PUNTO_COMA
-            | IMPORT error PUNTO_COMA
-              {: System.err.println("-> Recuperacion: Se omitio importacion invalida."); :}
-            ;
+paquete_opcional ::= USING NAMESPACE IDENTIFICADOR PUNTO_COMA | USING NAMESPACE STD PUNTO_COMA | /* vacio */ ;
+lista_importaciones ::= lista_importaciones importacion | /* vacio */ ;
+importacion ::= IMPORT IDENTIFICADOR PUNTO_COMA ;
 
 clase_principal ::= CLASS IDENTIFICADOR LLAVE_A cuerpo_clase LLAVE_C
-                | CLASS error LLAVE_C
-                  {: System.err.println("-> Recuperacion: Se omitio clase mal formada."); :}
-                | error
-                  {: System.err.println("Error fatal: Estructura general irrecuperable. Abortando."); System.exit(1); :}
-                ;
+                | error LLAVE_C {: System.err.println("-> Recuperacion: Se omitio clase mal formada."); :} ;
 
-cuerpo_clase ::= lista_elementos_clase
-               | /* Permite clase vacia */
-               ;
+cuerpo_clase ::= lista_elementos_clase | /* vacio */ ;
+lista_elementos_clase ::= lista_elementos_clase elemento_clase | elemento_clase ;
 
-lista_elementos_clase ::= lista_elementos_clase elemento_clase
-                        | elemento_clase
-                        ;
+elemento_clase ::= atributo_variable | constante | metodo_dummy
+                 | error PUNTO_COMA {: System.err.println("-> Recuperacion: Declaracion de clase invalida."); :} ;
 
-elemento_clase ::= atributo_variable
-                 | constante
-                 | metodo_dummy
-                 | error PUNTO_COMA 
-                   {: System.err.println("-> Recuperacion: Se omitio una declaracion invalida dentro de la clase."); :}
+metodo_dummy ::= VOID IDENTIFICADOR PARENTESIS_A PARENTESIS_C bloque
+               {: System.out.println("Regla reconocida: declaracion de metodo principal"); :} ;
+
+/* ACTIVIDAD 7: BLOQUES, SENTENCIAS Y ESTRUCTURAS DE CONTROL */
+
+bloque ::= LLAVE_A lista_sentencias LLAVE_C
+         {: System.out.println("Regla reconocida: bloque"); :}
+       | LLAVE_A lista_sentencias error:e
+         {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '}' para cerrar el bloque."); :}
+       ;
+
+lista_sentencias ::= lista_sentencias sentencia | /* vacio */ ;
+
+sentencia ::= lectura | escritura | asignacion | dec_var_local
+            | estructura_control
+            | BREAK PUNTO_COMA
+            | ELSE bloque 
+              {: System.err.println("Error sintactico: 'sino' no puede aparecer sin una estructura 'si' asociada."); :}
+            | error PUNTO_COMA {: System.err.println("-> Recuperacion: Se omitio una sentencia invalida anclada al ';'."); :}
+            ;
+
+estructura_control ::= seleccion_simple | seleccion_doble | seleccion_multiple
+                     | ciclo_mientras | ciclo_hacer_mientras | ciclo_para
+                     {: System.out.println("Regla reconocida: estructura_anidada"); :}
+                     ;
+
+condicion ::= expresion
+            {: System.out.println("Regla reconocida: condicion"); :} ;
+
+/* ESTRUCTURAS SELECTIVAS */
+seleccion_simple ::= IF PARENTESIS_A condicion PARENTESIS_C bloque
+                   {: System.out.println("Regla reconocida: seleccion_simple"); :}
+                 | IF error:e bloque
+                   {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '(' despues de 'si'."); :}
                  ;
 
-/* METODO CONTENEDOR TEMPORAL PARA LAS SENTENCIAS */
-metodo_dummy ::= VOID IDENTIFICADOR PARENTESIS_A PARENTESIS_C LLAVE_A lista_sentencias LLAVE_C
-               {: System.out.println("Regla reconocida: declaracion de metodo principal"); :}
-             ;
+seleccion_doble ::= IF PARENTESIS_A condicion PARENTESIS_C bloque ELSE bloque
+                  {: System.out.println("Regla reconocida: seleccion_doble"); :} ;
 
-/* =========================================================================
-   ACTIVIDAD 6: SENTENCIAS Y EXPRESIONES
-   ========================================================================= */
+seleccion_multiple ::= SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos defecto LLAVE_C
+                     {: System.out.println("Regla reconocida: seleccion_multiple"); :}
+                   | SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos LLAVE_C
+                     {: System.out.println("Regla reconocida: seleccion_multiple (sin defecto)"); :} ;
 
-lista_sentencias ::= lista_sentencias sentencia
-                   | /* vacio */
-                   ;
+lista_casos ::= lista_casos caso | caso ;
 
-sentencia ::= lectura
-            | escritura
-            | asignacion
-            | error PUNTO_COMA
-              {: System.err.println("-> Recuperacion: Se omitio una sentencia invalida."); :}
-            ;
+caso ::= CASE valor DOS_PUNTOS lista_sentencias
+       | CASE error:e DOS_PUNTOS lista_sentencias
+         {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un valor despues de 'caso'."); :} ;
 
-lectura ::= LEER PARENTESIS_A lista_identificadores PARENTESIS_C PUNTO_COMA
-          {: System.out.println("Regla reconocida: sentencia de lectura"); :}
-          ;
+defecto ::= DEFAULT DOS_PUNTOS lista_sentencias ;
 
-escritura ::= ESCRIBIR PARENTESIS_A lista_elementos PARENTESIS_C PUNTO_COMA
-            {: System.out.println("Regla reconocida: sentencia de escritura"); :}
-            ;
+/* ESTRUCTURAS ITERATIVAS */
+ciclo_mientras ::= WHILE PARENTESIS_A condicion PARENTESIS_C bloque
+                 {: System.out.println("Regla reconocida: ciclo_mientras"); :}
+               | WHILE PARENTESIS_A condicion error:e bloque
+                 {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba ')' en la condicion del ciclo."); :}
+               ;
 
-asignacion ::= IDENTIFICADOR IGUAL expresion PUNTO_COMA
-             {: System.out.println("Regla reconocida: asignacion con expresion"); :}
-             ;
+ciclo_hacer_mientras ::= DO bloque WHILE PARENTESIS_A condicion PARENTESIS_C PUNTO_COMA
+                       {: System.out.println("Regla reconocida: ciclo_hacer_mientras"); :} ;
 
-lista_elementos ::= expresion
-                  | lista_elementos COMA expresion
-                  ;
+ciclo_para ::= FOR PARENTESIS_A dec_var_local condicion PUNTO_COMA actualizacion_para PARENTESIS_C bloque
+             {: System.out.println("Regla reconocida: ciclo_para"); :}
+           | FOR PARENTESIS_A dec_var_local condicion PUNTO_COMA PARENTESIS_C bloque
+             {: System.err.println("Error sintactico: se esperaba la seccion de actualizacion del ciclo 'para'."); :}
+           ;
 
-expresion ::= expresion MAS expresion       {: System.out.println("Regla reconocida: expresion aritmetica (suma)"); :}
-            | expresion MENOS expresion     {: System.out.println("Regla reconocida: expresion aritmetica (resta)"); :}
-            | expresion POR expresion       {: System.out.println("Regla reconocida: expresion aritmetica (multiplicacion)"); :}
-            | expresion ENTRE expresion     {: System.out.println("Regla reconocida: expresion aritmetica (division)"); :}
-            | expresion MODULO expresion    {: System.out.println("Regla reconocida: expresion aritmetica (modulo)"); :}
-            | expresion AND expresion       {: System.out.println("Regla reconocida: expresion logica (AND)"); :}
-            | expresion OR expresion        {: System.out.println("Regla reconocida: expresion logica (OR)"); :}
-            | NOT expresion                 {: System.out.println("Regla reconocida: expresion logica (NOT)"); :}
-            | expresion MAYOR expresion     {: System.out.println("Regla reconocida: expresion relacional (mayor)"); :}
-            | expresion MENOR expresion     {: System.out.println("Regla reconocida: expresion relacional (menor)"); :}
-            | expresion MAYOR_IGUAL expresion
-            | expresion MENOR_IGUAL expresion
-            | expresion IGUAL_IGUAL expresion
-            | expresion DISTINTO expresion
-            | PARENTESIS_A expresion PARENTESIS_C {: System.out.println("Regla reconocida: expresion agrupada por parentesis"); :}
-            | IDENTIFICADOR
-            | valor
-            ;
+actualizacion_para ::= IDENTIFICADOR IGUAL expresion ;
 
-/* ========================================================================= */
+/* ENTRADA, SALIDA, ASIGNACION Y EXPRESIONES */
+lectura ::= LEER PARENTESIS_A lista_identificadores PARENTESIS_C PUNTO_COMA ;
+escritura ::= ESCRIBIR PARENTESIS_A lista_elementos PARENTESIS_C PUNTO_COMA ;
+
+dec_var_local ::= tipo_dato IDENTIFICADOR IGUAL expresion PUNTO_COMA ;
+asignacion ::= IDENTIFICADOR IGUAL expresion PUNTO_COMA ;
+
+lista_elementos ::= expresion | lista_elementos COMA expresion ;
+
+expresion ::= expresion MAS expresion | expresion MENOS expresion
+            | expresion POR expresion | expresion ENTRE expresion | expresion MODULO expresion
+            | expresion AND expresion | expresion OR expresion | NOT expresion
+            | expresion MAYOR expresion | expresion MENOR expresion | expresion MAYOR_IGUAL expresion
+            | expresion MENOR_IGUAL expresion | expresion IGUAL_IGUAL expresion | expresion DISTINTO expresion
+            | PARENTESIS_A expresion PARENTESIS_C
+            | IDENTIFICADOR | valor ;
 
 tipo_dato ::= INT | FLOAT | DOUBLE | CHAR | BOOL | STRING ;
-
 valor ::= ENTERO | DECIMAL | CADENA | TRUE | FALSE ;
-
-atributo_variable ::= tipo_dato lista_identificadores PUNTO_COMA
-                  | tipo_dato lista_identificadores IGUAL valor PUNTO_COMA
-                  ;
-
-lista_identificadores ::= IDENTIFICADOR
-                        | lista_identificadores COMA IDENTIFICADOR
-                        ;
-
-constante ::= CONST tipo_dato IDENTIFICADOR IGUAL valor PUNTO_COMA
-          | CONST tipo_dato IDENTIFICADOR:id PUNTO_COMA
-            {: System.err.println("Error: Constante debe inicializarse en linea " + (idleft + 1)); 
-               System.err.println("-> Recuperacion: Constante mal formada omitida."); :}
-          ;
+atributo_variable ::= tipo_dato lista_identificadores PUNTO_COMA | tipo_dato lista_identificadores IGUAL valor PUNTO_COMA ;
+lista_identificadores ::= IDENTIFICADOR | lista_identificadores COMA IDENTIFICADOR ;
+constante ::= CONST tipo_dato IDENTIFICADOR IGUAL valor PUNTO_COMA ;

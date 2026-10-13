@@ -1,7 +1,5 @@
 /* CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO */
-
 package ManejoErrores;
-
 import java_cup.runtime.Symbol;
 
 %%
@@ -14,38 +12,14 @@ import java_cup.runtime.Symbol;
 %column
 
 %eofval{
-    return new Symbol(
-        sym.EOF,
-        yyline,
-        yycolumn,
-        "FIN_DE_ARCHIVO"
-    );
+    return new Symbol(sym.EOF, yyline, yycolumn, "FIN_DE_ARCHIVO");
 %eofval}
 
 %{
     private int erroresLexicos = 0;
-
-    public int getErroresLexicos() {
-        return erroresLexicos;
-    }
-
-    private Symbol symbol(int type) {
-        return new Symbol(
-            type,
-            yyline,
-            yycolumn,
-            yytext()
-        );
-    }
-
-    private Symbol symbol(int type, Object value) {
-        return new Symbol(
-            type,
-            yyline,
-            yycolumn,
-            value
-        );
-    }
+    public int getErroresLexicos() { return erroresLexicos; }
+    private Symbol symbol(int type) { return new Symbol(type, yyline, yycolumn, yytext()); }
+    private Symbol symbol(int type, Object value) { return new Symbol(type, yyline, yycolumn, value); }
 %}
 
 LineTerminator = \r|\n|\r\n
@@ -58,7 +32,6 @@ FloatLiteral = [0-9]+\.[0-9]+
 %%
 
 <YYINITIAL> {
-
     /* TIPOS DE DATO */
     "int"       { return symbol(sym.INT); }
     "string"    { return symbol(sym.STRING); }
@@ -70,16 +43,16 @@ FloatLiteral = [0-9]+\.[0-9]+
     "long"      { return symbol(sym.LONG); }
     "short"     { return symbol(sym.SHORT); }
 
-    /* CONTROL DE FLUJO */
-    "if"        { return symbol(sym.IF); }
-    "else"      { return symbol(sym.ELSE); }
-    "for"       { return symbol(sym.FOR); }
-    "while"     { return symbol(sym.WHILE); }
-    "do"        { return symbol(sym.DO); }
-    "switch"    { return symbol(sym.SWITCH); }
-    "case"      { return symbol(sym.CASE); }
-    "default"   { return symbol(sym.DEFAULT); }
-    "break"     { return symbol(sym.BREAK); }
+    /* CONTROL DE FLUJO (ACTIVIDAD 7) */
+    "si"        { return symbol(sym.IF); }
+    "sino"      { return symbol(sym.ELSE); }
+    "segun"     { return symbol(sym.SWITCH); }
+    "caso"      { return symbol(sym.CASE); }
+    "defecto"   { return symbol(sym.DEFAULT); }
+    "romper"    { return symbol(sym.BREAK); }
+    "para"      { return symbol(sym.FOR); }
+    "mientras"  { return symbol(sym.WHILE); }
+    "hacer"     { return symbol(sym.DO); }
     "continue"  { return symbol(sym.CONTINUE); }
 
     /* POO Y LIBRERIAS */
@@ -101,7 +74,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "import"    { return symbol(sym.IMPORT); }
     "const"     { return symbol(sym.CONST); }
 
-    /* ENTRADA Y SALIDA (ACTIVIDAD 6) */
+    /* ENTRADA Y SALIDA */
     "leer"      { return symbol(sym.LEER); }
     "escribir"  { return symbol(sym.ESCRIBIR); }
 
@@ -137,80 +110,39 @@ FloatLiteral = [0-9]+\.[0-9]+
     "]"         { return symbol(sym.CORCHETE_C); }
     "{"         { return symbol(sym.LLAVE_A); }
     "}"         { return symbol(sym.LLAVE_C); }
+    ":"         { return symbol(sym.DOS_PUNTOS); }
 
     /* CADENAS Y COMENTARIOS */
-    \"[^\"]*\" {
-        return symbol(sym.CADENA, yytext());
-    }
-
-    "//".* {
-        /* Ignorar comentario de linea. */
-    }
-
-    "/*"[^]*"*/" {
-        /* Ignorar comentario de bloque. */
-    }
+    \"[^\"]*\" { return symbol(sym.CADENA, yytext()); }
+    "//".*     { /* Ignorar */ }
+    "/*"[^]*"*/" { /* Ignorar */ }
 
     /* VALORES E IDENTIFICADORES */
-    "true"      { return symbol(sym.TRUE); }
-    "false"     { return symbol(sym.FALSE); }
+    "verdadero" { return symbol(sym.TRUE); }
+    "falso"     { return symbol(sym.FALSE); }
 
-    {Identifier} {
-        return symbol(sym.IDENTIFICADOR, yytext());
-    }
-
-    {FloatLiteral} {
-        return symbol(sym.DECIMAL, Double.valueOf(yytext()));
-    }
-
-    {IntegerLiteral} {
-        return symbol(sym.ENTERO, Integer.valueOf(yytext()));
-    }
+    {Identifier}     { return symbol(sym.IDENTIFICADOR, yytext()); }
+    {FloatLiteral}   { return symbol(sym.DECIMAL, Double.valueOf(yytext())); }
+    {IntegerLiteral} { return symbol(sym.ENTERO, Integer.valueOf(yytext())); }
 
     /* ESPACIOS */
-    {WhiteSpace} {
-        /* Ignorar. */
-    }
+    {WhiteSpace} { /* Ignorar. */ }
 
     /* ERRORES LEXICOS */
     [0-9]+[a-zA-Z_]+[a-zA-Z0-9_]* {
         erroresLexicos++;
-        System.err.println(
-            "Error Lexico: Identificador mal formado"
-            + " | Linea: " + (yyline + 1)
-            + ", Columna: " + (yycolumn + 1)
-            + " | Texto: " + yytext()
-        );
+        System.err.println("Error Lexico: Identificador mal formado | Linea: " + (yyline + 1) + ", Columna: " + (yycolumn + 1) + " | Texto: " + yytext());
     }
-
     [0-9]+\.[0-9]+\.[0-9\.]+ {
         erroresLexicos++;
-        System.err.println(
-            "Error Lexico: Literal numerico incorrecto"
-            + " | Linea: " + (yyline + 1)
-            + ", Columna: " + (yycolumn + 1)
-            + " | Texto: " + yytext()
-        );
+        System.err.println("Error Lexico: Literal numerico incorrecto | Linea: " + (yyline + 1) + ", Columna: " + (yycolumn + 1) + " | Texto: " + yytext());
     }
-
     \"[^\r\n\"]* {
         erroresLexicos++;
-        System.err.println(
-            "Error Lexico: Cadena mal formada (sin cerrar)"
-            + " | Linea: " + (yyline + 1)
-            + ", Columna: " + (yycolumn + 1)
-            + " | Texto: " + yytext()
-        );
+        System.err.println("Error Lexico: Cadena mal formada (sin cerrar) | Linea: " + (yyline + 1) + ", Columna: " + (yycolumn + 1) + " | Texto: " + yytext());
     }
 }
-
-/* CARACTERES NO RECONOCIDOS */
 [^] {
     erroresLexicos++;
-    System.err.println(
-        "Error Lexico: Caracter no reconocido"
-        + " | Linea: " + (yyline + 1)
-        + ", Columna: " + (yycolumn + 1)
-        + " | Texto: " + yytext()
-    );
+    System.err.println("Error Lexico: Caracter no reconocido | Linea: " + (yyline + 1) + ", Columna: " + (yycolumn + 1) + " | Texto: " + yytext());
 }

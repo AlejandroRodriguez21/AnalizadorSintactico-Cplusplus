@@ -1,14 +1,36 @@
 class Principal {
     void proceso() {
-        leer(a);
-        leer(b,c);
-        escribir("Inicio del proceso");
-        total = a + b;
-        promedio = (a+b+c)/3;
-        activo = a && b;
-        estado = !activo;
-        escribir("Resultado:", total);
-        escribir(promedio);
-        escribir(a+b);
+        leer(edad);
+        leer(contador);
+
+        si (edad >= 18) {
+            escribir("Mayor de edad");
+        } sino {
+            escribir("Menor de edad");
+        }
+
+        mientras (contador < 10) {
+            si (contador % 2 == 0) {
+                escribir("Par");
+            } sino {
+                escribir("Impar");
+            }
+            contador = contador + 1;
+        }
+
+        para (int i = 0; i < 5; i = i + 1) {
+            escribir(i);
+        }
+
+        para (int i = 0; i < 10; i = i + 1) {
+            si (i % 2 == 0) {
+                mientras (contador < 5) {
+                    escribir(i, contador);
+                    contador = contador + 1;
+                }
+            } sino {
+                escribir("Numero impar");
+            }
+        }
     }
 }
