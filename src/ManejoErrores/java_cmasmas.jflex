@@ -84,7 +84,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "break"     { return symbol(sym.BREAK); }
     "continue"  { return symbol(sym.CONTINUE); }
 
-    /* POO Y LIBRERÍAS */
+    /* POO Y LIBRERIAS */
 
     "class"     { return symbol(sym.CLASS); }
     "struct"    { return symbol(sym.STRUCT); }
@@ -102,8 +102,9 @@ FloatLiteral = [0-9]+\.[0-9]+
     "new"       { return symbol(sym.NEW); }
     "delete"    { return symbol(sym.DELETE); }
     "import"    { return symbol(sym.IMPORT); }
+    "const"     { return symbol(sym.CONST); }
 
-    /* OPERADORES LÓGICOS Y RELACIONALES */
+    /* OPERADORES LOGICOS Y RELACIONALES */
 
     "=="        { return symbol(sym.IGUAL_IGUAL); }
     "!="        { return symbol(sym.DISTINTO); }
@@ -113,7 +114,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "||"        { return symbol(sym.OR); }
     "!"         { return symbol(sym.NOT); }
 
-    /* OPERADORES BÁSICOS */
+    /* OPERADORES BASICOS */
 
     "+"         { return symbol(sym.MAS); }
     "-"         { return symbol(sym.MENOS); }
@@ -126,7 +127,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "<<"        { return symbol(sym.MENOR_MENOR); }
     ">>"        { return symbol(sym.MAYOR_MAYOR); }
 
-    /* PUNTUACIÓN Y AGRUPACIÓN */
+    /* PUNTUACION Y AGRUPACION */
 
     ";"         { return symbol(sym.PUNTO_COMA); }
     ","         { return symbol(sym.COMA); }
@@ -146,14 +147,17 @@ FloatLiteral = [0-9]+\.[0-9]+
     }
 
     "//".* {
-        /* Ignorar comentario de línea. */
+        /* Ignorar comentario de linea. */
     }
 
     "/*"[^]*"*/" {
         /* Ignorar comentario de bloque. */
     }
 
-    /* IDENTIFICADORES Y NÚMEROS VÁLIDOS */
+    /* VALORES E IDENTIFICADORES */
+
+    "true"      { return symbol(sym.TRUE); }
+    "false"     { return symbol(sym.FALSE); }
 
     {Identifier} {
         return symbol(sym.IDENTIFICADOR, yytext());
@@ -173,7 +177,7 @@ FloatLiteral = [0-9]+\.[0-9]+
         /* Ignorar. */
     }
 
-    /* ERRORES LÉXICOS DE LA ACTIVIDAD ANTERIOR */
+    /* ERRORES LEXICOS DE LA ACTIVIDAD ANTERIOR */
 
     [0-9]+[a-zA-Z_]+[a-zA-Z0-9_]* {
         erroresLexicos++;

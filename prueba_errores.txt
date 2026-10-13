@@ -1,6 +1,6 @@
-using namespace std
-import biblioteca.;
-import utilidades
-import correcta;
-class {};
-import tardia;
+using namespace std;
+class Errores {
+    int edad nombre; 
+    const int MAX;
+    float salario = ;
+}

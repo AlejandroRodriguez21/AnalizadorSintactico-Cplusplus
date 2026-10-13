@@ -31,14 +31,18 @@ public class ParserJava extends java_cup.runtime.lr_parser {
   /** Production table. */
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
-    "\000\027\000\002\002\004\000\002\002\005\000\002\003" +
-    "\003\000\002\003\002\000\002\004\006\000\002\004\005" +
-    "\000\002\004\005\000\002\010\003\000\002\010\005\000" +
-    "\002\011\003\000\002\011\003\000\002\005\004\000\002" +
-    "\005\002\000\002\006\005\000\002\006\004\000\002\006" +
-    "\005\000\002\012\003\000\002\012\003\000\002\012\005" +
-    "\000\002\007\007\000\002\007\007\000\002\007\006\000" +
-    "\002\007\010" });
+    "\000\045\000\002\002\004\000\002\002\005\000\002\003" +
+    "\006\000\002\003\006\000\002\003\005\000\002\003\002" +
+    "\000\002\004\004\000\002\004\002\000\002\005\005\000" +
+    "\002\005\005\000\002\006\007\000\002\006\005\000\002" +
+    "\006\003\000\002\007\003\000\002\007\002\000\002\010" +
+    "\004\000\002\010\003\000\002\011\003\000\002\011\003" +
+    "\000\002\011\004\000\002\014\003\000\002\014\003\000" +
+    "\002\014\003\000\002\014\003\000\002\014\003\000\002" +
+    "\014\003\000\002\015\003\000\002\015\003\000\002\015" +
+    "\003\000\002\015\003\000\002\015\003\000\002\012\005" +
+    "\000\002\012\007\000\002\016\003\000\002\016\005\000" +
+    "\002\013\010\000\002\013\006" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -46,33 +50,55 @@ public class ParserJava extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\052\000\010\027\ufffe\040\007\046\ufffe\001\002\000" +
-    "\006\027\uffff\046\uffff\001\002\000\004\002\054\001\002" +
-    "\000\006\027\ufff5\046\ufff5\001\002\000\006\003\011\041" +
-    "\010\001\002\000\006\042\014\102\013\001\002\000\004" +
-    "\070\012\001\002\000\006\027\ufffb\046\ufffb\001\002\000" +
-    "\012\027\ufff8\046\ufff8\070\ufff8\073\ufff8\001\002\000\012" +
-    "\027\ufff7\046\ufff7\070\ufff7\073\ufff7\001\002\000\012\027" +
-    "\ufffa\046\ufffa\070\ufffa\073\ufffa\001\002\000\012\027\ufffc" +
-    "\046\ufffc\070\017\073\020\001\002\000\006\027\ufffd\046" +
-    "\ufffd\001\002\000\006\042\014\102\013\001\002\000\012" +
-    "\027\ufff9\046\ufff9\070\ufff9\073\ufff9\001\002\000\006\027" +
-    "\025\046\023\001\002\000\010\003\044\042\047\102\045" +
-    "\001\002\000\004\002\000\001\002\000\006\003\027\102" +
-    "\030\001\002\000\006\027\ufff6\046\ufff6\001\002\000\004" +
-    "\100\041\001\002\000\006\003\031\100\032\001\002\000" +
-    "\004\070\040\001\002\000\006\003\033\101\034\001\002" +
-    "\000\004\101\036\001\002\000\004\070\035\001\002\000" +
-    "\004\002\uffee\001\002\000\004\070\037\001\002\000\004" +
-    "\002\uffeb\001\002\000\004\002\uffec\001\002\000\004\101" +
-    "\042\001\002\000\004\070\043\001\002\000\004\002\uffed" +
-    "\001\002\000\004\070\053\001\002\000\012\027\ufff1\046" +
-    "\ufff1\070\ufff1\072\ufff1\001\002\000\012\027\ufff3\046\ufff3" +
-    "\070\051\072\050\001\002\000\012\027\ufff0\046\ufff0\070" +
-    "\ufff0\072\ufff0\001\002\000\004\102\052\001\002\000\006" +
-    "\027\ufff4\046\ufff4\001\002\000\012\027\uffef\046\uffef\070" +
-    "\uffef\072\uffef\001\002\000\006\027\ufff2\046\ufff2\001\002" +
-    "\000\004\002\001\001\002" });
+    "\000\076\000\012\003\ufffc\027\ufffc\040\006\046\ufffc\001" +
+    "\002\000\010\003\ufffa\027\ufffa\046\ufffa\001\002\000\004" +
+    "\002\016\001\002\000\006\003\010\041\007\001\002\000" +
+    "\006\042\013\103\012\001\002\000\004\071\011\001\002" +
+    "\000\010\003\ufffd\027\ufffd\046\ufffd\001\002\000\004\071" +
+    "\015\001\002\000\004\071\014\001\002\000\010\003\ufffe" +
+    "\027\ufffe\046\ufffe\001\002\000\010\003\uffff\027\uffff\046" +
+    "\uffff\001\002\000\004\002\001\001\002\000\010\003\021" +
+    "\027\023\046\020\001\002\000\006\003\075\103\076\001" +
+    "\002\000\004\002\ufff5\001\002\000\004\002\000\001\002" +
+    "\000\006\003\025\103\026\001\002\000\010\003\ufffb\027" +
+    "\ufffb\046\ufffb\001\002\000\004\102\074\001\002\000\004" +
+    "\101\027\001\002\000\024\003\037\004\030\005\044\006" +
+    "\034\007\043\011\031\014\033\047\045\102\ufff3\001\002" +
+    "\000\004\103\uffed\001\002\000\004\103\uffe9\001\002\000" +
+    "\024\003\037\004\030\005\044\006\034\007\043\011\031" +
+    "\014\033\047\045\102\ufff4\001\002\000\004\103\uffe8\001" +
+    "\002\000\004\103\uffeb\001\002\000\024\003\uffef\004\uffef" +
+    "\005\uffef\006\uffef\007\uffef\011\uffef\014\uffef\047\uffef\102" +
+    "\uffef\001\002\000\024\003\ufff0\004\ufff0\005\ufff0\006\ufff0" +
+    "\007\ufff0\011\ufff0\014\ufff0\047\ufff0\102\ufff0\001\002\000" +
+    "\004\071\072\001\002\000\004\103\063\001\002\000\004" +
+    "\102\061\001\002\000\024\003\ufff1\004\ufff1\005\ufff1\006" +
+    "\ufff1\007\ufff1\011\ufff1\014\ufff1\047\ufff1\102\ufff1\001\002" +
+    "\000\004\103\uffea\001\002\000\004\103\uffec\001\002\000" +
+    "\016\004\030\005\044\006\034\007\043\011\031\014\033" +
+    "\001\002\000\004\103\047\001\002\000\006\064\050\071" +
+    "\051\001\002\000\014\104\056\105\057\106\055\107\053" +
+    "\110\054\001\002\000\024\003\uffdd\004\uffdd\005\uffdd\006" +
+    "\uffdd\007\uffdd\011\uffdd\014\uffdd\047\uffdd\102\uffdd\001\002" +
+    "\000\004\071\060\001\002\000\004\071\uffe4\001\002\000" +
+    "\004\071\uffe3\001\002\000\004\071\uffe6\001\002\000\004" +
+    "\071\uffe5\001\002\000\004\071\uffe7\001\002\000\024\003" +
+    "\uffde\004\uffde\005\uffde\006\uffde\007\uffde\011\uffde\014\uffde" +
+    "\047\uffde\102\uffde\001\002\000\004\002\ufff7\001\002\000" +
+    "\010\064\066\071\065\072\064\001\002\000\010\064\uffe0" +
+    "\071\uffe0\072\uffe0\001\002\000\004\103\071\001\002\000" +
+    "\024\003\uffe2\004\uffe2\005\uffe2\006\uffe2\007\uffe2\011\uffe2" +
+    "\014\uffe2\047\uffe2\102\uffe2\001\002\000\014\104\056\105" +
+    "\057\106\055\107\053\110\054\001\002\000\004\071\070" +
+    "\001\002\000\024\003\uffe1\004\uffe1\005\uffe1\006\uffe1\007" +
+    "\uffe1\011\uffe1\014\uffe1\047\uffe1\102\uffe1\001\002\000\010" +
+    "\064\uffdf\071\uffdf\072\uffdf\001\002\000\024\003\uffee\004" +
+    "\uffee\005\uffee\006\uffee\007\uffee\011\uffee\014\uffee\047\uffee" +
+    "\102\uffee\001\002\000\024\003\ufff2\004\ufff2\005\ufff2\006" +
+    "\ufff2\007\ufff2\011\ufff2\014\ufff2\047\ufff2\102\ufff2\001\002" +
+    "\000\004\002\ufff6\001\002\000\004\071\100\001\002\000" +
+    "\004\071\077\001\002\000\010\003\ufff9\027\ufff9\046\ufff9" +
+    "\001\002\000\010\003\ufff8\027\ufff8\046\ufff8\001\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -80,21 +106,29 @@ public class ParserJava extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\052\000\010\002\004\003\005\004\003\001\001\000" +
-    "\002\001\001\000\002\001\001\000\004\005\021\001\001" +
-    "\000\002\001\001\000\006\010\015\011\014\001\001\000" +
+    "\000\076\000\006\002\004\003\003\001\001\000\004\004" +
+    "\016\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\006\005\023\006\021\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\004\011\020\001\001\000\002\001\001\000\006" +
-    "\006\025\007\023\001\001\000\004\012\045\001\001\000" +
+    "\001\000\016\007\040\010\031\011\041\012\035\013\034" +
+    "\014\037\001\001\000\002\001\001\000\002\001\001\000" +
+    "\012\011\072\012\035\013\034\014\037\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\004\016\061\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\004\014\045\001\001\000\002\001\001\000\002" +
+    "\001\001\000\004\015\051\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\015\066\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\002\001\001" });
+    "\001\001" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -133,208 +167,33 @@ public class ParserJava extends java_cup.runtime.lr_parser {
 
 
 
-    private int erroresSintacticos = 0;
-    private boolean errorFatal = false;
-    private int etapa = 0;
-    private String contexto = "estructura del archivo";
-    private Symbol ultimoError;
-
-    public int getErroresSintacticos() {
-        return erroresSintacticos;
-    }
-
-    public boolean huboErrorFatal() {
-        return errorFatal;
-    }
-
-    private void actualizarContexto() {
-        for (Object elemento : stack) {
-            Symbol s = (Symbol) elemento;
-
-            if (s.sym == sym.USING && "using".equals(s.value)) {
-                etapa = 1;
-                contexto = "directiva using namespace";
-
-            } else if (s.sym == sym.IMPORT && "import".equals(s.value)) {
-                etapa = 2;
-                contexto = "importacion";
-
-            } else if (s.sym == sym.CLASS && "class".equals(s.value)) {
-                etapa = 3;
-                contexto = "clase principal";
-            }
-        }
-    }
-
-    public void faltaPuntoComa(String estructura) {
-        report_error(
-            "Falta ';' al terminar " + estructura + ".",
-            cur_token
-        );
-
-        recuperacion(
-            "Se conserva la siguiente estructura como punto de continuacion."
-        );
-    }
-
-    public void regla(String nombre, int linea) {
-        System.out.println(
-            "Regla reconocida: " + nombre
-            + " | Linea: " + (linea + 1)
-        );
-    }
-
-    public void recuperacion(String descripcion) {
-        System.out.println(
-            "Recuperacion: " + descripcion
-            + " Se continua el analisis."
-        );
-    }
-
-    private String esperado(int token) {
-        switch (token) {
-            case sym.IDENTIFICADOR:
-                return "identificador valido";
-            case sym.NAMESPACE:
-                return "'namespace'";
-            case sym.PUNTO_COMA:
-                return "';'";
-            case sym.LLAVE_A:
-                return "'{'";
-            case sym.LLAVE_C:
-                return "'}'";
-            case sym.CLASS:
-                return "'class'";
-            case sym.IMPORT:
-                return "'import'";
-            case sym.USING:
-                return "'using'";
-            case sym.STD:
-                return "'std'";
-            case sym.DOS_PUNTOS:
-                return "'::'";
-            case sym.PUNTO:
-                return "'.'";
-            case sym.EOF:
-                return "fin del archivo";
-            default:
-                return sym.terminalNames[token];
-        }
-    }
-
-    private String descripcion() {
-        StringBuilder texto =
-            new StringBuilder("Estructura incorrecta en ")
-                .append(contexto);
-
-        java.util.List<Integer> tokens = expected_token_ids();
-        boolean primero = true;
-
-        for (int token : tokens) {
-            if (token == sym.error) {
-                continue;
-            }
-
-            texto.append(primero ? "; se esperaba " : " o ")
-                 .append(esperado(token));
-
-            primero = false;
-        }
-
-        return texto.append('.').toString();
-    }
-
-    private void imprimirError(
-        String tipo,
-        String mensaje,
-        Object info
-    ) {
-        Symbol s = info instanceof Symbol
-            ? (Symbol) info
-            : ultimoError;
-
-        if (s == null) {
-            s = cur_token;
-        }
-
-        String token = s.sym == sym.EOF
-            ? "FIN_DE_ARCHIVO"
-            : String.valueOf(s.value);
-
-        System.err.println(
-            tipo
-            + " en linea " + (s.left + 1)
-            + ", columna " + (s.right + 1)
-            + ": se encontro '" + token + "'. "
-            + mensaje
-        );
-    }
-
     @Override
     public void report_error(String message, Object info) {
-        erroresSintacticos++;
-        imprimirError("Error sintactico", message, info);
+        StringBuilder m = new StringBuilder("Error sintactico");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                m.append(" en linea ").append(s.left + 1);
+                if (s.right >= 0) m.append(", columna ").append(s.right + 1);
+            }
+            m.append(": se encontro '").append(s.value != null ? s.value : "TOKEN_DESCONOCIDO").append("'");
+        }
+        System.err.println(m.toString());
     }
 
     @Override
     public void report_fatal_error(String message, Object info) {
-        errorFatal = true;
-
-        imprimirError("Error fatal", message, info);
-
-        done_parsing();
-
-        throw new IllegalStateException(
-            "Analisis detenido por error fatal."
-        );
-    }
-
-    @Override
-    public void syntax_error(Symbol token) {
-        actualizarContexto();
-        ultimoError = token;
-
-        java.util.List<Integer> esperados = expected_token_ids();
-
-        if (
-            (
-                etapa >= 3
-                && (
-                    token.sym == sym.IMPORT
-                    || token.sym == sym.USING
-                    || token.sym == sym.CLASS
-                )
-            )
-            || (etapa >= 1 && token.sym == sym.USING)
-            || (
-                esperados.size() == 1
-                && esperados.contains(sym.EOF)
-            )
-        ) {
-            report_fatal_error(
-                "Orden estructural invalido: la directiva inicial y las "
-                + "importaciones deben preceder a la unica clase principal.",
-                token
-            );
+        StringBuilder m = new StringBuilder("Error fatal");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                m.append(" en linea ").append(s.left + 1);
+                if (s.right >= 0) m.append(", columna ").append(s.right + 1);
+            }
+            m.append(": se encontro '").append(s.value != null ? s.value : "TOKEN_DESCONOCIDO").append("'");
         }
-
-        report_error(descripcion(), token);
-    }
-
-    @Override
-    public void unrecovered_syntax_error(Symbol token)
-        throws Exception {
-
-        report_fatal_error(
-            "No existe un punto de recuperacion que permita completar "
-            + "la estructura del archivo.",
-            ultimoError != null ? ultimoError : token
-        );
-    }
-
-    @Override
-    protected int error_sync_size() {
-        return 1;
+        System.err.println(m.toString());
+        System.exit(1);
     }
 
 
@@ -377,250 +236,331 @@ class CUP$ParserJava$actions {
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 1: // archivo ::= directiva_opcional lista_importaciones clase_principal 
+          case 1: // archivo ::= paquete_opcional lista_importaciones clase_principal 
             {
               Object RESULT =null;
-
+		 System.out.println("Analisis sintactico finalizado correctamente"); 
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("archivo",0, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 2: // directiva_opcional ::= directiva 
+          case 2: // paquete_opcional ::= USING NAMESPACE IDENTIFICADOR PUNTO_COMA 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: directiva using namespace"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("paquete_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 3: // directiva_opcional ::= 
+          case 3: // paquete_opcional ::= USING NAMESPACE STD PUNTO_COMA 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: directiva using namespace"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("paquete_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 4: // directiva ::= USING NAMESPACE ruta_namespace PUNTO_COMA 
+          case 4: // paquete_opcional ::= USING error PUNTO_COMA 
             {
               Object RESULT =null;
-		int uleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).left;
-		int uright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).right;
-		Object u = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).value;
-		
-        parser.regla("directiva using namespace", uleft);
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.err.println("-> Recuperacion: Se omitio paquete invalido."); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("paquete_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 5: // directiva ::= USING NAMESPACE ruta_namespace 
+          case 5: // paquete_opcional ::= 
             {
               Object RESULT =null;
-		
-        parser.faltaPuntoComa("la directiva using namespace");
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("paquete_opcional",1, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 6: // directiva ::= USING error PUNTO_COMA 
+          case 6: // lista_importaciones ::= lista_importaciones importacion 
             {
               Object RESULT =null;
-		
-        parser.recuperacion(
-            "Se omite la directiva using namespace con ruta "
-            + "o estructura invalida hasta ';'."
-        );
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("directiva",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_importaciones",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 7: // ruta_namespace ::= nombre_namespace 
+          case 7: // lista_importaciones ::= 
             {
               Object RESULT =null;
 
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("ruta_namespace",6, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_importaciones",2, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 8: // ruta_namespace ::= ruta_namespace DOS_PUNTOS nombre_namespace 
+          case 8: // importacion ::= IMPORT IDENTIFICADOR PUNTO_COMA 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("ruta_namespace",6, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: importacion"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",3, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 9: // nombre_namespace ::= IDENTIFICADOR 
+          case 9: // importacion ::= IMPORT error PUNTO_COMA 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("nombre_namespace",7, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.err.println("-> Recuperacion: Se omitio importacion invalida."); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",3, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // nombre_namespace ::= STD 
+          case 10: // clase_principal ::= CLASS IDENTIFICADOR LLAVE_A cuerpo_clase LLAVE_C 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("nombre_namespace",7, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: clase principal y estructura de llaves valida"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // lista_importaciones ::= lista_importaciones importacion 
+          case 11: // clase_principal ::= CLASS error LLAVE_C 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_importaciones",3, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.err.println("-> Recuperacion: Se omitio clase mal formada."); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // lista_importaciones ::= 
+          case 12: // clase_principal ::= error 
             {
               Object RESULT =null;
-
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_importaciones",3, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.err.println("Error fatal: Estructura general irrecuperable. Abortando."); System.exit(1); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // importacion ::= IMPORT ruta_modulo PUNTO_COMA 
+          case 13: // cuerpo_clase ::= lista_elementos_clase 
             {
               Object RESULT =null;
-		int ileft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)).left;
-		int iright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)).right;
-		Object i = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)).value;
-		
-        parser.regla("importacion", ileft);
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: Clase con miembros"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("cuerpo_clase",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 14: // importacion ::= IMPORT ruta_modulo 
+          case 14: // cuerpo_clase ::= 
             {
               Object RESULT =null;
-		
-        parser.faltaPuntoComa("la importacion");
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.out.println("Regla reconocida: Clase vacia"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("cuerpo_clase",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 15: // importacion ::= IMPORT error PUNTO_COMA 
+          case 15: // lista_elementos_clase ::= lista_elementos_clase elemento_clase 
             {
               Object RESULT =null;
-		
-        parser.recuperacion(
-            "Se omite la importacion con ruta invalida hasta ';'."
-        );
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("importacion",4, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_elementos_clase",6, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 16: // ruta_modulo ::= IDENTIFICADOR 
+          case 16: // lista_elementos_clase ::= elemento_clase 
             {
               Object RESULT =null;
 
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("ruta_modulo",8, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_elementos_clase",6, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 17: // ruta_modulo ::= STD 
+          case 17: // elemento_clase ::= atributo_variable 
             {
               Object RESULT =null;
 
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("ruta_modulo",8, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("elemento_clase",7, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 18: // ruta_modulo ::= ruta_modulo PUNTO IDENTIFICADOR 
+          case 18: // elemento_clase ::= constante 
             {
               Object RESULT =null;
 
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("ruta_modulo",8, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("elemento_clase",7, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 19: // clase_principal ::= CLASS IDENTIFICADOR LLAVE_A LLAVE_C PUNTO_COMA 
+          case 19: // elemento_clase ::= error PUNTO_COMA 
             {
               Object RESULT =null;
-		int cleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).left;
-		int cright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).right;
-		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).value;
-		
-        parser.regla("clase principal", cleft);
-        parser.regla("estructura de llaves valida", cleft);
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+		 System.err.println("Error: Declaracion invalida");
+                      System.err.println("-> Recuperacion: Se omitio una declaracion invalida dentro de la clase."); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("elemento_clase",7, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 20: // clase_principal ::= CLASS error LLAVE_A LLAVE_C PUNTO_COMA 
+          case 20: // tipo_dato ::= INT 
             {
               Object RESULT =null;
-		int cleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).left;
-		int cright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).right;
-		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)).value;
-		
-        parser.recuperacion(
-            "Se omite la clase sin nombre valido."
-        );
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 21: // clase_principal ::= CLASS IDENTIFICADOR error PUNTO_COMA 
+          case 21: // tipo_dato ::= FLOAT 
             {
               Object RESULT =null;
-		int cleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).left;
-		int cright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).right;
-		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)).value;
-		
-        parser.recuperacion(
-            "Se omite la clase con delimitadores incorrectos hasta ';'."
-        );
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 22: // clase_principal ::= CLASS IDENTIFICADOR LLAVE_A error LLAVE_C PUNTO_COMA 
+          case 22: // tipo_dato ::= DOUBLE 
             {
               Object RESULT =null;
-		int cleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)).left;
-		int cright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)).right;
-		Object c = (Object)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)).value;
-		
-        parser.recuperacion(
-            "Se omite la estructura invalida entre las llaves de la clase."
-        );
-    
-              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("clase_principal",5, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 23: // tipo_dato ::= CHAR 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 24: // tipo_dato ::= BOOL 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 25: // tipo_dato ::= STRING 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("tipo_dato",10, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 26: // valor ::= ENTERO 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("valor",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 27: // valor ::= DECIMAL 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("valor",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 28: // valor ::= CADENA 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("valor",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 29: // valor ::= TRUE 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("valor",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 30: // valor ::= FALSE 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("valor",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 31: // atributo_variable ::= tipo_dato lista_identificadores PUNTO_COMA 
+            {
+              Object RESULT =null;
+		 System.out.println("Regla reconocida: Declaracion de atributo"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("atributo_variable",8, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 32: // atributo_variable ::= tipo_dato lista_identificadores IGUAL valor PUNTO_COMA 
+            {
+              Object RESULT =null;
+		 System.out.println("Regla reconocida: Inicializacion de atributo"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("atributo_variable",8, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 33: // lista_identificadores ::= IDENTIFICADOR 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_identificadores",12, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 34: // lista_identificadores ::= lista_identificadores COMA IDENTIFICADOR 
+            {
+              Object RESULT =null;
+
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("lista_identificadores",12, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 35: // constante ::= CONST tipo_dato IDENTIFICADOR IGUAL valor PUNTO_COMA 
+            {
+              Object RESULT =null;
+		 System.out.println("Regla reconocida: Declaracion de constante"); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("constante",9, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
+            }
+          return CUP$ParserJava$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 36: // constante ::= CONST tipo_dato IDENTIFICADOR PUNTO_COMA 
+            {
+              Object RESULT =null;
+		int idleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).left;
+		int idright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).right;
+		String id = (String)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).value;
+		 System.err.println("Error: Constante debe inicializarse en linea " + (idleft + 1)); 
+               System.err.println("-> Recuperacion: Constante mal formada omitida."); 
+              CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("constante",9, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-3)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
 
