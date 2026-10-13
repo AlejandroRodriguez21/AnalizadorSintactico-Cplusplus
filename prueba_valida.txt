@@ -1,9 +1,14 @@
-using namespace std;
-import libreria;
 class Principal {
-    int edad;
-    float salario = 5000.50;
-    string nombre, apellido;
-    const double PI = 3.1416;
-    const int MAX = 100;
+    void proceso() {
+        leer(a);
+        leer(b,c);
+        escribir("Inicio del proceso");
+        total = a + b;
+        promedio = (a+b+c)/3;
+        activo = a && b;
+        estado = !activo;
+        escribir("Resultado:", total);
+        escribir(promedio);
+        escribir(a+b);
+    }
 }

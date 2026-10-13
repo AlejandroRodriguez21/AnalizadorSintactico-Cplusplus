@@ -1,6 +1,10 @@
-using namespace std;
-class Errores {
-    int edad nombre; 
-    const int MAX;
-    float salario = ;
+class Principal {
+    void proceso() {
+        leer(a b);
+        escribir("Inicio"
+        total = a+;
+        resultado = a + b;
+        leer(a,,b);
+        escribir(,a);
+    }
 }

@@ -60,7 +60,6 @@ FloatLiteral = [0-9]+\.[0-9]+
 <YYINITIAL> {
 
     /* TIPOS DE DATO */
-
     "int"       { return symbol(sym.INT); }
     "string"    { return symbol(sym.STRING); }
     "float"     { return symbol(sym.FLOAT); }
@@ -72,7 +71,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     "short"     { return symbol(sym.SHORT); }
 
     /* CONTROL DE FLUJO */
-
     "if"        { return symbol(sym.IF); }
     "else"      { return symbol(sym.ELSE); }
     "for"       { return symbol(sym.FOR); }
@@ -85,7 +83,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     "continue"  { return symbol(sym.CONTINUE); }
 
     /* POO Y LIBRERIAS */
-
     "class"     { return symbol(sym.CLASS); }
     "struct"    { return symbol(sym.STRUCT); }
     "public"    { return symbol(sym.PUBLIC); }
@@ -104,8 +101,11 @@ FloatLiteral = [0-9]+\.[0-9]+
     "import"    { return symbol(sym.IMPORT); }
     "const"     { return symbol(sym.CONST); }
 
-    /* OPERADORES LOGICOS Y RELACIONALES */
+    /* ENTRADA Y SALIDA (ACTIVIDAD 6) */
+    "leer"      { return symbol(sym.LEER); }
+    "escribir"  { return symbol(sym.ESCRIBIR); }
 
+    /* OPERADORES LOGICOS Y RELACIONALES */
     "=="        { return symbol(sym.IGUAL_IGUAL); }
     "!="        { return symbol(sym.DISTINTO); }
     ">="        { return symbol(sym.MAYOR_IGUAL); }
@@ -115,7 +115,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     "!"         { return symbol(sym.NOT); }
 
     /* OPERADORES BASICOS */
-
     "+"         { return symbol(sym.MAS); }
     "-"         { return symbol(sym.MENOS); }
     "*"         { return symbol(sym.POR); }
@@ -128,7 +127,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     ">>"        { return symbol(sym.MAYOR_MAYOR); }
 
     /* PUNTUACION Y AGRUPACION */
-
     ";"         { return symbol(sym.PUNTO_COMA); }
     ","         { return symbol(sym.COMA); }
     "."         { return symbol(sym.PUNTO); }
@@ -141,7 +139,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     "}"         { return symbol(sym.LLAVE_C); }
 
     /* CADENAS Y COMENTARIOS */
-
     \"[^\"]*\" {
         return symbol(sym.CADENA, yytext());
     }
@@ -155,7 +152,6 @@ FloatLiteral = [0-9]+\.[0-9]+
     }
 
     /* VALORES E IDENTIFICADORES */
-
     "true"      { return symbol(sym.TRUE); }
     "false"     { return symbol(sym.FALSE); }
 
@@ -172,16 +168,13 @@ FloatLiteral = [0-9]+\.[0-9]+
     }
 
     /* ESPACIOS */
-
     {WhiteSpace} {
         /* Ignorar. */
     }
 
-    /* ERRORES LEXICOS DE LA ACTIVIDAD ANTERIOR */
-
+    /* ERRORES LEXICOS */
     [0-9]+[a-zA-Z_]+[a-zA-Z0-9_]* {
         erroresLexicos++;
-
         System.err.println(
             "Error Lexico: Identificador mal formado"
             + " | Linea: " + (yyline + 1)
@@ -192,7 +185,6 @@ FloatLiteral = [0-9]+\.[0-9]+
 
     [0-9]+\.[0-9]+\.[0-9\.]+ {
         erroresLexicos++;
-
         System.err.println(
             "Error Lexico: Literal numerico incorrecto"
             + " | Linea: " + (yyline + 1)
@@ -203,7 +195,6 @@ FloatLiteral = [0-9]+\.[0-9]+
 
     \"[^\r\n\"]* {
         erroresLexicos++;
-
         System.err.println(
             "Error Lexico: Cadena mal formada (sin cerrar)"
             + " | Linea: " + (yyline + 1)
@@ -214,10 +205,8 @@ FloatLiteral = [0-9]+\.[0-9]+
 }
 
 /* CARACTERES NO RECONOCIDOS */
-
 [^] {
     erroresLexicos++;
-
     System.err.println(
         "Error Lexico: Caracter no reconocido"
         + " | Linea: " + (yyline + 1)
