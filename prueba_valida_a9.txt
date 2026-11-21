@@ -1,0 +1,16 @@
+
+class SistemaEscolar {
+    int totalAlumnos;
+    bool sistemaAbierto = verdadero;
+    const int MAX_CALIFICACION = 100;
+
+    void registrar() {
+        escribir("Registrando...");
+    }
+
+    int calcularPromedio(int nota1, int nota2) {
+        int sumaNotas = nota1 + nota2;
+        int promedioFinal = sumaNotas / 2;
+        retornar promedioFinal;
+    }
+}

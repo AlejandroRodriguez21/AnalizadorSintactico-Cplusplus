@@ -1,0 +1,10 @@
+
+class mi_sistema {
+    int AtributoIncorrecto;
+    const float VALOR_CONSTANTE;
+
+    void proceso() {
+        int x;
+        int x = z + 10;
+    }
+}
