@@ -36,14 +36,18 @@ terminal TRUE, FALSE;
 /* NO TERMINALES ESTRUCTURA BASE */
 non terminal archivo, paquete_opcional, lista_importaciones, importacion, clase_principal;
 non terminal cuerpo_clase, lista_elementos_clase, elemento_clase;
-non terminal atributo_variable, constante, metodo_dummy;
+non terminal atributo_variable, constante;
 non terminal tipo_dato, valor, lista_identificadores;
 
-/* NO TERMINALES ACTIVIDAD 6 Y 7 */
+/* NO TERMINALES ACTIVIDAD 7 */
 non terminal lista_sentencias, sentencia, bloque;
 non terminal lectura, escritura, asignacion, lista_elementos, expresion, condicion;
 non terminal estructura_control, seleccion_simple, seleccion_doble, seleccion_multiple, lista_casos, caso, defecto;
 non terminal ciclo_mientras, ciclo_hacer_mientras, ciclo_para, actualizacion_para, dec_var_local;
+
+/* NO TERMINALES ACTIVIDAD 8 (METODOS Y LLAMADAS) */
+non terminal metodo, parametros_optativos, lista_parametros, parametro;
+non terminal llamada_metodo, lista_argumentos_optativos, lista_argumentos, retorno;
 
 /* PRECEDENCIA Y ASOCIATIVIDAD */
 precedence right IGUAL;
@@ -53,7 +57,7 @@ precedence left IGUAL_IGUAL, DISTINTO, MAYOR, MENOR, MAYOR_IGUAL, MENOR_IGUAL;
 precedence left MAS, MENOS;
 precedence left POR, ENTRE, MODULO;
 precedence right NOT;
-precedence left ELSE; 
+precedence left ELSE;
 
 start with archivo;
 
@@ -70,80 +74,96 @@ clase_principal ::= CLASS IDENTIFICADOR LLAVE_A cuerpo_clase LLAVE_C
 cuerpo_clase ::= lista_elementos_clase | /* vacio */ ;
 lista_elementos_clase ::= lista_elementos_clase elemento_clase | elemento_clase ;
 
-elemento_clase ::= atributo_variable | constante | metodo_dummy
+/* Corrección de la ambigüedad: Evaluamos directamente tipo_dato o VOID para el método */
+elemento_clase ::= atributo_variable 
+                 | constante 
+                 | metodo
+                 | tipo_dato IDENTIFICADOR error:e bloque
+                   {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '(' despues del nombre del metodo."); :}
+                 | VOID IDENTIFICADOR error:e bloque
+                   {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '(' despues del nombre del metodo."); :}
                  | error PUNTO_COMA {: System.err.println("-> Recuperacion: Declaracion de clase invalida."); :} ;
 
-metodo_dummy ::= VOID IDENTIFICADOR PARENTESIS_A PARENTESIS_C bloque
-               {: System.out.println("Regla reconocida: declaracion de metodo principal"); :} ;
+/* ================= ACTIVIDAD 8: METODOS ================= */
 
-/* ACTIVIDAD 7: BLOQUES, SENTENCIAS Y ESTRUCTURAS DE CONTROL */
+metodo ::= tipo_dato IDENTIFICADOR PARENTESIS_A parametros_optativos PARENTESIS_C bloque
+         {: System.out.println("Regla reconocida: definicion_metodo (con retorno)"); :}
+       | VOID IDENTIFICADOR PARENTESIS_A parametros_optativos PARENTESIS_C bloque
+         {: System.out.println("Regla reconocida: definicion_metodo (void)"); :}
+       ;
+
+parametros_optativos ::= lista_parametros {: System.out.println("Regla reconocida: metodo_con_parametros"); :}
+                       | /* vacio */ {: System.out.println("Regla reconocida: metodo_sin_parametros"); :} ;
+
+lista_parametros ::= lista_parametros COMA parametro
+                   | lista_parametros COMA error:e
+                     {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un parametro despues de ','."); :}
+                   | parametro 
+                     {: System.out.println("Regla reconocida: lista_parametros"); :} ;
+
+parametro ::= tipo_dato IDENTIFICADOR
+            | tipo_dato error:e
+              {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un identificador para el parametro."); :} ;
+
+llamada_metodo ::= IDENTIFICADOR PARENTESIS_A lista_argumentos_optativos PARENTESIS_C
+                 {: System.out.println("Regla reconocida: llamada_metodo"); :} ;
+
+lista_argumentos_optativos ::= lista_argumentos | /* vacio */ ;
+
+lista_argumentos ::= expresion 
+                     {: System.out.println("Regla reconocida: lista_argumentos"); :}
+                   | lista_argumentos COMA expresion
+                   | lista_argumentos COMA error:e
+                     {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba una expresion despues de ','."); :} ;
+
+retorno ::= RETURN expresion PUNTO_COMA
+          {: System.out.println("Regla reconocida: retorno con expresion"); :}
+          | RETURN PUNTO_COMA
+          {: System.out.println("Regla reconocida: retorno sin expresion"); :}
+          | RETURN error:e PUNTO_COMA
+          {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba una expresion despues de 'retornar'."); :} ;
+
+/* ========================================================== */
 
 bloque ::= LLAVE_A lista_sentencias LLAVE_C
          {: System.out.println("Regla reconocida: bloque"); :}
        | LLAVE_A lista_sentencias error:e
-         {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '}' para cerrar el bloque."); :}
-       ;
+         {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '}' para cerrar el bloque."); :} ;
 
 lista_sentencias ::= lista_sentencias sentencia | /* vacio */ ;
 
 sentencia ::= lectura | escritura | asignacion | dec_var_local
             | estructura_control
+            | retorno
+            | llamada_metodo PUNTO_COMA 
+            | IDENTIFICADOR PARENTESIS_A lista_argumentos_optativos error PUNTO_COMA
+              {: System.err.println("Error sintactico: se esperaba ')' al finalizar los argumentos."); :}
+            | IDENTIFICADOR PUNTO_COMA
+              {: System.err.println("Error sintactico: se esperaba '(' para iniciar la llamada al metodo."); :}
             | BREAK PUNTO_COMA
             | ELSE bloque 
               {: System.err.println("Error sintactico: 'sino' no puede aparecer sin una estructura 'si' asociada."); :}
-            | error PUNTO_COMA {: System.err.println("-> Recuperacion: Se omitio una sentencia invalida anclada al ';'."); :}
-            ;
+            | error PUNTO_COMA {: System.err.println("-> Recuperacion: Se omitio una sentencia invalida anclada al ';'."); :} ;
 
-estructura_control ::= seleccion_simple | seleccion_doble | seleccion_multiple
-                     | ciclo_mientras | ciclo_hacer_mientras | ciclo_para
-                     {: System.out.println("Regla reconocida: estructura_anidada"); :}
-                     ;
+estructura_control ::= seleccion_simple | seleccion_doble | seleccion_multiple | ciclo_mientras | ciclo_hacer_mientras | ciclo_para ;
+condicion ::= expresion ;
 
-condicion ::= expresion
-            {: System.out.println("Regla reconocida: condicion"); :} ;
-
-/* ESTRUCTURAS SELECTIVAS */
-seleccion_simple ::= IF PARENTESIS_A condicion PARENTESIS_C bloque
-                   {: System.out.println("Regla reconocida: seleccion_simple"); :}
-                 | IF error:e bloque
-                   {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '(' despues de 'si'."); :}
-                 ;
-
-seleccion_doble ::= IF PARENTESIS_A condicion PARENTESIS_C bloque ELSE bloque
-                  {: System.out.println("Regla reconocida: seleccion_doble"); :} ;
-
+seleccion_simple ::= IF PARENTESIS_A condicion PARENTESIS_C bloque ;
+seleccion_doble ::= IF PARENTESIS_A condicion PARENTESIS_C bloque ELSE bloque ;
 seleccion_multiple ::= SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos defecto LLAVE_C
-                     {: System.out.println("Regla reconocida: seleccion_multiple"); :}
-                   | SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos LLAVE_C
-                     {: System.out.println("Regla reconocida: seleccion_multiple (sin defecto)"); :} ;
+                   | SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos LLAVE_C ;
 
 lista_casos ::= lista_casos caso | caso ;
-
-caso ::= CASE valor DOS_PUNTOS lista_sentencias
-       | CASE error:e DOS_PUNTOS lista_sentencias
-         {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un valor despues de 'caso'."); :} ;
-
+caso ::= CASE valor DOS_PUNTOS lista_sentencias | CASE error:e DOS_PUNTOS lista_sentencias ;
 defecto ::= DEFAULT DOS_PUNTOS lista_sentencias ;
 
-/* ESTRUCTURAS ITERATIVAS */
-ciclo_mientras ::= WHILE PARENTESIS_A condicion PARENTESIS_C bloque
-                 {: System.out.println("Regla reconocida: ciclo_mientras"); :}
-               | WHILE PARENTESIS_A condicion error:e bloque
-                 {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba ')' en la condicion del ciclo."); :}
-               ;
-
-ciclo_hacer_mientras ::= DO bloque WHILE PARENTESIS_A condicion PARENTESIS_C PUNTO_COMA
-                       {: System.out.println("Regla reconocida: ciclo_hacer_mientras"); :} ;
-
+ciclo_mientras ::= WHILE PARENTESIS_A condicion PARENTESIS_C bloque | WHILE PARENTESIS_A condicion error:e bloque ;
+ciclo_hacer_mientras ::= DO bloque WHILE PARENTESIS_A condicion PARENTESIS_C PUNTO_COMA ;
 ciclo_para ::= FOR PARENTESIS_A dec_var_local condicion PUNTO_COMA actualizacion_para PARENTESIS_C bloque
-             {: System.out.println("Regla reconocida: ciclo_para"); :}
-           | FOR PARENTESIS_A dec_var_local condicion PUNTO_COMA PARENTESIS_C bloque
-             {: System.err.println("Error sintactico: se esperaba la seccion de actualizacion del ciclo 'para'."); :}
-           ;
+           | FOR PARENTESIS_A dec_var_local condicion PUNTO_COMA PARENTESIS_C bloque ;
 
 actualizacion_para ::= IDENTIFICADOR IGUAL expresion ;
 
-/* ENTRADA, SALIDA, ASIGNACION Y EXPRESIONES */
 lectura ::= LEER PARENTESIS_A lista_identificadores PARENTESIS_C PUNTO_COMA ;
 escritura ::= ESCRIBIR PARENTESIS_A lista_elementos PARENTESIS_C PUNTO_COMA ;
 
@@ -152,13 +172,14 @@ asignacion ::= IDENTIFICADOR IGUAL expresion PUNTO_COMA ;
 
 lista_elementos ::= expresion | lista_elementos COMA expresion ;
 
-expresion ::= expresion MAS expresion | expresion MENOS expresion
-            | expresion POR expresion | expresion ENTRE expresion | expresion MODULO expresion
+/* Integración de llamada a método dentro de expresiones matemáticas o asignaciones */
+expresion ::= expresion MAS expresion | expresion MENOS expresion | expresion POR expresion | expresion ENTRE expresion | expresion MODULO expresion
             | expresion AND expresion | expresion OR expresion | NOT expresion
             | expresion MAYOR expresion | expresion MENOR expresion | expresion MAYOR_IGUAL expresion
             | expresion MENOR_IGUAL expresion | expresion IGUAL_IGUAL expresion | expresion DISTINTO expresion
             | PARENTESIS_A expresion PARENTESIS_C
-            | IDENTIFICADOR | valor ;
+            | IDENTIFICADOR | valor 
+            | llamada_metodo ;
 
 tipo_dato ::= INT | FLOAT | DOUBLE | CHAR | BOOL | STRING ;
 valor ::= ENTERO | DECIMAL | CADENA | TRUE | FALSE ;

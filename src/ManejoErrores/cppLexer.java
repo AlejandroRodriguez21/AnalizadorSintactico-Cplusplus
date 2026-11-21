@@ -110,11 +110,12 @@ public class cppLexer implements java_cup.runtime.Scanner {
     "\1\62\2\24\1\63\2\24\1\64\1\65\1\66\1\67"+
     "\5\24\1\70\1\71\1\72\10\24\1\73\1\74\2\24"+
     "\1\75\3\24\1\76\1\77\1\24\1\100\4\24\1\101"+
-    "\1\102\1\103\1\104\1\105\2\24\1\106\3\24\1\107"+
-    "\2\24\1\110\1\111\1\112\3\24\1\113\1\114\1\115";
+    "\1\24\1\102\1\103\1\104\2\24\1\105\3\24\1\106"+
+    "\3\24\1\107\1\110\1\111\2\24\1\112\1\24\1\113"+
+    "\1\114\1\115";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[226];
+    int [] result = new int[228];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -164,13 +165,13 @@ public class cppLexer implements java_cup.runtime.Scanner {
     "\0\u0258\0\u0258\0\u0258\0\u19fa\0\u1a2c\0\u1a5e\0\u1a90\0\u1ac2"+
     "\0\u1af4\0\u1b26\0\u1b58\0\u0258\0\u0258\0\u1b8a\0\u1bbc\0\u0258"+
     "\0\u1bee\0\u1c20\0\u1c52\0\u0258\0\u0258\0\u1c84\0\u0258\0\u1cb6"+
-    "\0\u1ce8\0\u1d1a\0\u1d4c\0\u0258\0\u0258\0\u0258\0\u0258\0\u0258"+
-    "\0\u1d7e\0\u1db0\0\u0258\0\u1de2\0\u1e14\0\u1e46\0\u0258\0\u1e78"+
-    "\0\u1eaa\0\u0258\0\u0258\0\u0258\0\u1edc\0\u1f0e\0\u1f40\0\u0258"+
-    "\0\u0258\0\u0258";
+    "\0\u1ce8\0\u1d1a\0\u1d4c\0\u0258\0\u1d7e\0\u0258\0\u0258\0\u0258"+
+    "\0\u1db0\0\u1de2\0\u0258\0\u1e14\0\u1e46\0\u1e78\0\u0258\0\u1eaa"+
+    "\0\u1edc\0\u1f0e\0\u0258\0\u0258\0\u0258\0\u1f40\0\u1f72\0\u0258"+
+    "\0\u1fa4\0\u0258\0\u0258\0\u0258";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[226];
+    int [] result = new int[228];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -284,7 +285,7 @@ public class cppLexer implements java_cup.runtime.Scanner {
     "\5\0\1\27\2\0\22\27\1\233\1\27\25\0\1\27"+
     "\5\0\1\27\2\0\20\27\1\234\3\27\25\0\1\27"+
     "\5\0\1\27\2\0\11\27\1\235\12\27\25\0\1\27"+
-    "\5\0\1\27\2\0\21\27\1\236\2\27\25\0\1\27"+
+    "\5\0\1\27\2\0\14\27\1\236\7\27\25\0\1\27"+
     "\5\0\1\27\2\0\15\27\1\237\6\27\25\0\1\27"+
     "\5\0\1\27\2\0\21\27\1\240\2\27\25\0\1\27"+
     "\5\0\1\27\2\0\16\27\1\241\5\27\25\0\1\27"+
@@ -341,20 +342,21 @@ public class cppLexer implements java_cup.runtime.Scanner {
     "\23\27\25\0\1\27\5\0\1\27\2\0\1\326\23\27"+
     "\25\0\1\27\5\0\1\27\2\0\4\27\1\327\17\27"+
     "\25\0\1\27\5\0\1\27\2\0\20\27\1\330\3\27"+
-    "\25\0\1\27\5\0\1\27\2\0\4\27\1\331\17\27"+
-    "\25\0\1\27\5\0\1\27\2\0\4\27\1\332\17\27"+
-    "\25\0\1\27\5\0\1\27\2\0\16\27\1\333\5\27"+
-    "\25\0\1\27\5\0\1\27\2\0\17\27\1\334\4\27"+
-    "\25\0\1\27\5\0\1\27\2\0\2\27\1\335\21\27"+
-    "\25\0\1\27\5\0\1\27\2\0\4\27\1\336\17\27"+
-    "\25\0\1\27\5\0\1\27\2\0\16\27\1\337\5\27"+
-    "\25\0\1\27\5\0\1\27\2\0\4\27\1\340\17\27"+
-    "\25\0\1\27\5\0\1\27\2\0\3\27\1\341\20\27"+
-    "\25\0\1\27\5\0\1\27\2\0\14\27\1\342\7\27"+
-    "\3\0";
+    "\25\0\1\27\5\0\1\27\2\0\1\331\23\27\25\0"+
+    "\1\27\5\0\1\27\2\0\4\27\1\332\17\27\25\0"+
+    "\1\27\5\0\1\27\2\0\4\27\1\333\17\27\25\0"+
+    "\1\27\5\0\1\27\2\0\16\27\1\334\5\27\25\0"+
+    "\1\27\5\0\1\27\2\0\17\27\1\335\4\27\25\0"+
+    "\1\27\5\0\1\27\2\0\2\27\1\336\21\27\25\0"+
+    "\1\27\5\0\1\27\2\0\4\27\1\337\17\27\25\0"+
+    "\1\27\5\0\1\27\2\0\16\27\1\340\5\27\25\0"+
+    "\1\27\5\0\1\27\2\0\16\27\1\341\5\27\25\0"+
+    "\1\27\5\0\1\27\2\0\4\27\1\342\17\27\25\0"+
+    "\1\27\5\0\1\27\2\0\3\27\1\343\20\27\25\0"+
+    "\1\27\5\0\1\27\2\0\14\27\1\344\7\27\3\0";
 
   private static int [] zzUnpacktrans() {
-    int [] result = new int[8050];
+    int [] result = new int[8150];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -400,10 +402,10 @@ public class cppLexer implements java_cup.runtime.Scanner {
     "\1\0\2\11\3\1\1\11\1\1\7\11\3\1\1\11"+
     "\4\1\2\11\20\1\1\11\1\1\2\11\1\0\2\11"+
     "\1\0\1\1\1\0\1\1\6\11\41\1\1\11\1\0"+
-    "\47\1\1\0\135\1";
+    "\47\1\1\0\137\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[226];
+    int [] result = new int[228];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -1240,47 +1242,47 @@ public class cppLexer implements java_cup.runtime.Scanner {
           // fall through
           case 142: break;
           case 66:
-            { return symbol(sym.RETURN);
+            { return symbol(sym.BREAK);
             }
           // fall through
           case 143: break;
           case 67:
-            { return symbol(sym.BREAK);
+            { return symbol(sym.STRING);
             }
           // fall through
           case 144: break;
           case 68:
-            { return symbol(sym.STRING);
+            { return symbol(sym.STRUCT);
             }
           // fall through
           case 145: break;
           case 69:
-            { return symbol(sym.STRUCT);
+            { return symbol(sym.DEFAULT);
             }
           // fall through
           case 146: break;
           case 70:
-            { return symbol(sym.DEFAULT);
+            { return symbol(sym.PRIVATE);
             }
           // fall through
           case 147: break;
           case 71:
-            { return symbol(sym.PRIVATE);
+            { return symbol(sym.CONTINUE);
             }
           // fall through
           case 148: break;
           case 72:
-            { return symbol(sym.CONTINUE);
+            { return symbol(sym.ESCRIBIR);
             }
           // fall through
           case 149: break;
           case 73:
-            { return symbol(sym.ESCRIBIR);
+            { return symbol(sym.WHILE);
             }
           // fall through
           case 150: break;
           case 74:
-            { return symbol(sym.WHILE);
+            { return symbol(sym.RETURN);
             }
           // fall through
           case 151: break;

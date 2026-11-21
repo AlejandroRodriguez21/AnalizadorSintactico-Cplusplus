@@ -43,7 +43,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "long"      { return symbol(sym.LONG); }
     "short"     { return symbol(sym.SHORT); }
 
-    /* CONTROL DE FLUJO (ACTIVIDAD 7) */
+    /* CONTROL DE FLUJO */
     "si"        { return symbol(sym.IF); }
     "sino"      { return symbol(sym.ELSE); }
     "segun"     { return symbol(sym.SWITCH); }
@@ -61,7 +61,7 @@ FloatLiteral = [0-9]+\.[0-9]+
     "public"    { return symbol(sym.PUBLIC); }
     "private"   { return symbol(sym.PRIVATE); }
     "protected" { return symbol(sym.PROTECTED); }
-    "return"    { return symbol(sym.RETURN); }
+    "retornar"  { return symbol(sym.RETURN); } /* Adaptado a español para Actividad 8 */
     "using"     { return symbol(sym.USING); }
     "namespace" { return symbol(sym.NAMESPACE); }
     "std"       { return symbol(sym.STD); }

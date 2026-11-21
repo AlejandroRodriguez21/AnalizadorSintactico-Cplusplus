@@ -1,36 +1,34 @@
 class Principal {
-    void proceso() {
-        leer(edad);
-        leer(contador);
+    void iniciar() {
+        escribir("Inicio del programa");
+    }
 
-        si (edad >= 18) {
-            escribir("Mayor de edad");
+    void mostrar(int valor) {
+        escribir(valor);
+    }
+
+    int sumar(int a, int b) {
+        retornar a + b;
+    }
+
+    int obtenerValor() {
+        retornar 100;
+    }
+
+    int calcular(int x, int y) {
+        int resultado = sumar(x,y);
+        si (resultado > 100) {
+            resultado = resultado * 2;
         } sino {
-            escribir("Menor de edad");
+            resultado = resultado + 10;
         }
+        retornar resultado;
+    }
 
-        mientras (contador < 10) {
-            si (contador % 2 == 0) {
-                escribir("Par");
-            } sino {
-                escribir("Impar");
-            }
-            contador = contador + 1;
-        }
-
-        para (int i = 0; i < 5; i = i + 1) {
-            escribir(i);
-        }
-
-        para (int i = 0; i < 10; i = i + 1) {
-            si (i % 2 == 0) {
-                mientras (contador < 5) {
-                    escribir(i, contador);
-                    contador = contador + 1;
-                }
-            } sino {
-                escribir("Numero impar");
-            }
-        }
+    void proceso() {
+        iniciar();
+        mostrar(10);
+        int total = calcular(20,30);
+        escribir(total);
     }
 }
