@@ -1,0 +1,20 @@
+
+class EvaluadorErrores {
+    int contador = 5;
+    bool bandera = falso;
+    const int LIMITE = 100;
+
+    void ejecutar() {
+        int a = 0;
+        bool b = falso;
+
+        a = "Hola mundo";
+        contador = bandera * 10;
+        si (contador + 5) {
+            escribir("Error");
+        }
+        LIMITE = 200;
+        a = variableInexistente + 2;
+        b = contador && bandera;
+    }
+}

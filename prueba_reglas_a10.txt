@@ -1,0 +1,22 @@
+
+class ReglasTipos {
+    int numero = 6;
+    float decimalValor = 1.5;
+    const bool ACTIVO = verdadero;
+
+    void comprobar() {
+        int calculo = 2 + 4;
+        float mezcla = numero * decimalValor;
+        bool mayor = numero >= 4;
+        bool igual = ACTIVO == verdadero;
+        bool ambos = mayor && igual;
+        bool negado = !ambos;
+        bool alguno = mayor || negado;
+        bool distinto = numero != 0;
+        int resto = numero % 2;
+
+        si (ambos) {
+            escribir(mezcla);
+        }
+    }
+}

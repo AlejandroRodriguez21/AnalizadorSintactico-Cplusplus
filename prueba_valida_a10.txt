@@ -1,0 +1,24 @@
+
+class Evaluador {
+    int base = 10;
+    float factor = 2.5;
+    const float PI = 3.1416;
+    bool esActivo = verdadero;
+
+    void ejecutar() {
+        int resultado = 0;
+        float calculoComplejo = 0.0;
+        bool condicion = falso;
+        int operacionEntera = 2 + 3;
+
+        resultado = base * 5;
+        calculoComplejo = (base + factor) * PI;
+        condicion = (resultado > 20) && esActivo;
+        condicion = !condicion || esActivo;
+        operacionEntera = resultado % 3;
+
+        si (condicion) {
+            escribir("Calculo correcto");
+        }
+    }
+}

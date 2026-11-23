@@ -6,7 +6,7 @@ public class Simbolo {
     public final String id;
     public final String tiposimbolo;
     public final String tipodato;
-    public final String valor;
+    public String valor;
     public final String ambito;
     public final int linea;
     public final int columna;

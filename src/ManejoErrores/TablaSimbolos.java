@@ -88,6 +88,7 @@ public class TablaSimbolos {
         }
 
         String clave = ambitoActual() + "|" + id;
+
         if (simbolos.containsKey(clave)) {
             error(linea, columna, "El identificador '" + id
                     + "' ya fue declarado en el ambito '" + ambitoActual() + "'.");
@@ -98,20 +99,65 @@ public class TablaSimbolos {
                 ambitoActual(), linea, columna, "IDENTIFICADOR"));
     }
 
-    public void verificarUso(String id, int linea, int columna) {
+    public Simbolo buscarUso(String id, int linea, int columna) {
         for (String ambito : ambitos) {
-            if (simbolos.containsKey(ambito + "|" + id)) {
-                return;
-            }
+            Simbolo encontrado = simbolos.get(ambito + "|" + id);
+            if (encontrado != null) return encontrado;
         }
-        error(linea, columna, "El identificador '" + id
+
+        error(linea, columna, id, "El identificador '" + id
                 + "' NO ha sido declarado en el ambito '" + ambitoActual() + "'.");
+        return null;
+    }
+
+    public void verificarUso(String id, int linea, int columna) {
+        buscarUso(id, linea, columna);
+    }
+
+    /** Valida una asignacion y actualiza el valor textual si es compatible. */
+    public void asignar(String id, ManejadorTipos.Expresion expresion, int linea, int columna) {
+        Simbolo destino = buscarUso(id, linea, columna);
+        if (destino == null) return;
+
+        if ("CONSTANTE".equals(destino.tiposimbolo)) {
+            error(linea, columna, id,
+                    "No se puede reasignar un valor a la constante '" + id + "'.");
+            return;
+        }
+
+        if ("ERROR".equals(expresion.tipo)) return;
+
+        if (!ManejadorTipos.asignable(destino.tipodato, expresion.tipo)) {
+            error(linea, columna, id,
+                    "Incompatibilidad de tipos: no se puede asignar '"
+                    + expresion.tipo + "' a '" + destino.tipodato + "' (" + id + ").");
+            return;
+        }
+
+        destino.valor = expresion.texto;
+    }
+
+    /** Comprueba el tipo de una inicializacion antes de registrar el simbolo. */
+    public void validarInicializacion(String id, String tipo,
+            ManejadorTipos.Expresion expresion, int linea, int columna) {
+        if (!"ERROR".equals(expresion.tipo)
+                && !ManejadorTipos.asignable(tipo, expresion.tipo)) {
+            error(linea, columna, id,
+                    "Incompatibilidad de tipos: no se puede inicializar '"
+                    + id + "' de tipo '" + tipo + "' con '" + expresion.tipo + "'.");
+        }
     }
 
     public void error(int linea, int columna, String motivo) {
         errores++;
         System.err.println("Error semantico en linea " + linea
                 + ", columna " + columna + ": " + motivo);
+    }
+
+    public void error(int linea, int columna, String token, String motivo) {
+        errores++;
+        System.err.println("Error semantico en linea " + linea + ", columna " + columna
+                + ", token '" + token + "': " + motivo);
     }
 
     public int getErrores() {
@@ -123,11 +169,13 @@ public class TablaSimbolos {
         System.out.printf("%-20s %-11s %-10s %-18s %-29s %5s %7s %s%n",
                 "ID", "Categoria", "Tipo", "Valor", "Ambito", "Linea", "Columna", "Token");
         System.out.println("-----------------------------------------------------------------------------------------------");
+
         for (Simbolo s : simbolos.values()) {
             System.out.printf("%-20s %-11s %-10s %-18s %-29s %5d %7d %s%n",
                     s.id, s.tiposimbolo, s.tipodato, s.valor, s.ambito,
                     s.linea, s.columna, s.token);
         }
+
         System.out.println("Total de simbolos registrados: " + simbolos.size());
         System.out.println("Total de errores semanticos: " + errores);
         System.out.println("=====================================================================\n");
