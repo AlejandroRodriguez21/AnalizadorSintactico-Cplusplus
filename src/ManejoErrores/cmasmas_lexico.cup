@@ -49,7 +49,8 @@ non terminal ManejoErrores.ManejadorTipos.Expresion expresion, condicion;
 non terminal java.util.List lista_identificadores;
 non terminal Boolean lista_sentencias, sentencia, bloque, retorno, estructura_control, seleccion_simple, seleccion_doble, seleccion_multiple, ciclo_mientras, ciclo_hacer_mientras, ciclo_para;
 non terminal lectura, escritura, asignacion, lista_elementos;
-non terminal lista_casos, caso, defecto, cabecera_switch;
+non terminal lista_casos, caso, defecto, cabecera_switch, inicio_if, inicio_caso, inicio_defecto, inicio_while, inicio_do, comienzo_actualizacion_for, comienzo_cuerpo_for;
+non terminal java.util.List inicio_else;
 non terminal actualizacion_para, dec_var_local, inicio_ciclo, inicio_for, fin_firma;
 non terminal metodo, cabecera_metodo, parametros_optativos, lista_parametros, parametro, inicio_bloque;
 non terminal java.util.List lista_argumentos_optativos, lista_argumentos;
@@ -140,11 +141,17 @@ lista_argumentos ::= expresion:e
     | lista_argumentos:args COMA error:e
     {: System.err.println("Error sintactico en linea "+(eleft+1)+": argumento incompleto."); RESULT=args; :} ;
 retorno ::= RETURN:op expresion:e PUNTO_COMA
-    {: parser.getTablaSimbolos().validarRetorno(e,opleft+1,opright+1);
+    {: int antes = parser.getTablaSimbolos().getErrores();
+       parser.getTablaSimbolos().validarRetorno(e,opleft+1,opright+1);
+       if (antes == parser.getTablaSimbolos().getErrores())
+           parser.getTablaSimbolos().getCodigoIntermedio().retornar(e);
        RESULT=parser.getTablaSimbolos().retornoValido(e);
        System.out.println("Regla reconocida: retorno con expresion"); :}
     | RETURN:op PUNTO_COMA
-    {: parser.getTablaSimbolos().validarRetorno(null,opleft+1,opright+1);
+    {: int antes = parser.getTablaSimbolos().getErrores();
+       parser.getTablaSimbolos().validarRetorno(null,opleft+1,opright+1);
+       if (antes == parser.getTablaSimbolos().getErrores())
+           parser.getTablaSimbolos().getCodigoIntermedio().retornar(null);
        RESULT=parser.getTablaSimbolos().retornoValido(null);
        System.out.println("Regla reconocida: retorno sin expresion"); :}
     | RETURN error:e PUNTO_COMA
@@ -167,15 +174,24 @@ sentencia ::= lectura {: RESULT=false; :}
             | dec_var_local {: RESULT=false; :}
             | estructura_control:e {: RESULT=e; :}
             | retorno:r {: RESULT=r; :}
-            | llamada_metodo PUNTO_COMA {: RESULT=false; :}
+            | llamada_metodo:e PUNTO_COMA
+              {: parser.getTablaSimbolos().getCodigoIntermedio().invocar(e); RESULT=false; :}
             | IDENTIFICADOR PARENTESIS_A lista_argumentos_optativos error PUNTO_COMA
               {: System.err.println("Error sintactico: se esperaba ')' al finalizar los argumentos."); RESULT=false; :}
             | IDENTIFICADOR PUNTO_COMA
               {: System.err.println("Error sintactico: se esperaba '(' para iniciar la llamada al metodo."); RESULT=false; :}
             | BREAK:kw PUNTO_COMA
-              {: parser.getTablaSimbolos().validarBreak(kwleft+1,kwright+1); RESULT=false; :}
+              {: int antes=parser.getTablaSimbolos().getErrores();
+                 parser.getTablaSimbolos().validarBreak(kwleft+1,kwright+1);
+                 if (antes == parser.getTablaSimbolos().getErrores())
+                     parser.getTablaSimbolos().getCodigoIntermedio().romper();
+                 RESULT=false; :}
             | CONTINUE:kw PUNTO_COMA
-              {: parser.getTablaSimbolos().validarContinue(kwleft+1,kwright+1); RESULT=false; :}
+              {: int antes=parser.getTablaSimbolos().getErrores();
+                 parser.getTablaSimbolos().validarContinue(kwleft+1,kwright+1);
+                 if (antes == parser.getTablaSimbolos().getErrores())
+                     parser.getTablaSimbolos().getCodigoIntermedio().continuar();
+                 RESULT=false; :}
             | bloque:r {: RESULT=r; :}
             | ELSE bloque
               {: System.err.println("Error sintactico: 'sino' sin 'si'."); RESULT=false; :}
@@ -191,37 +207,69 @@ estructura_control ::= seleccion_simple:r {: RESULT=r; :}
                      | ciclo_hacer_mientras:r {: RESULT=r; :}
                      | ciclo_para:r {: RESULT=r; :} ;
 condicion ::= expresion:e {: RESULT=e; :} ;
-seleccion_simple ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C bloque
-    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1); RESULT=false; :} ;
-seleccion_doble ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C bloque:a ELSE bloque:b
-    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1); RESULT=a && b; :} ;
+inicio_if ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarIf(); :} ;
+inicio_else ::= /* vacio */
+    {: RESULT=parser.getTablaSimbolos().getCodigoIntermedio().iniciarElse(); :} ;
+seleccion_simple ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C inicio_if bloque
+    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarIf(e);
+       RESULT=false; :} ;
+seleccion_doble ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C inicio_if bloque:a ELSE inicio_else:verdadero bloque:b
+    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarIfElse(e,verdadero);
+       RESULT=a && b; :} ;
 cabecera_switch ::= SWITCH:kw PARENTESIS_A expresion:e PARENTESIS_C LLAVE_A
-    {: parser.getTablaSimbolos().abrirSwitch(e,kwleft+1,kwright+1); :} ;
+    {: parser.getTablaSimbolos().abrirSwitch(e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().iniciarSwitch(e); :} ;
 seleccion_multiple ::= cabecera_switch lista_casos defecto LLAVE_C
-    {: parser.getTablaSimbolos().cerrarSwitch(); RESULT=false; :}
+    {: parser.getTablaSimbolos().cerrarSwitch();
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarSwitch(); RESULT=false; :}
     | cabecera_switch lista_casos LLAVE_C
-    {: parser.getTablaSimbolos().cerrarSwitch(); RESULT=false; :} ;
+    {: parser.getTablaSimbolos().cerrarSwitch();
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarSwitch(); RESULT=false; :} ;
 lista_casos ::= lista_casos caso | caso ;
-caso ::= CASE:kw valor:v DOS_PUNTOS lista_sentencias
-    {: parser.getTablaSimbolos().registrarCaso(v,kwleft+1,kwright+1); :}
-    | CASE error DOS_PUNTOS lista_sentencias ;
-defecto ::= DEFAULT DOS_PUNTOS lista_sentencias ;
+inicio_caso ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarCaso(); :} ;
+caso ::= CASE:kw valor:v DOS_PUNTOS inicio_caso lista_sentencias
+    {: parser.getTablaSimbolos().registrarCaso(v,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarCaso(v); :}
+    | CASE error DOS_PUNTOS inicio_caso lista_sentencias
+    {: parser.getTablaSimbolos().getCodigoIntermedio().finalizarCaso("ERROR"); :} ;
+inicio_defecto ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarDefecto(); :} ;
+defecto ::= DEFAULT DOS_PUNTOS inicio_defecto lista_sentencias
+    {: parser.getTablaSimbolos().getCodigoIntermedio().finalizarDefecto(); :} ;
 inicio_ciclo ::= /* vacio */ {: parser.getTablaSimbolos().abrirCiclo(); :} ;
-inicio_for ::= /* vacio */ {: parser.getTablaSimbolos().abrirFor(); :} ;
-ciclo_mientras ::= WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C inicio_ciclo bloque
+inicio_while ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarWhile(); :} ;
+inicio_do ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarDoWhile(); :} ;
+inicio_for ::= /* vacio */
+    {: parser.getTablaSimbolos().abrirFor();
+       parser.getTablaSimbolos().getCodigoIntermedio().iniciarFor(); :} ;
+comienzo_actualizacion_for ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarActualizacionFor(); :} ;
+comienzo_cuerpo_for ::= /* vacio */
+    {: parser.getTablaSimbolos().getCodigoIntermedio().iniciarCuerpoFor(); :} ;
+ciclo_mientras ::= WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C inicio_ciclo inicio_while bloque
     {: parser.getTablaSimbolos().cerrarCiclo();
-       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"mientras",e,kwleft+1,kwright+1); RESULT=false; :}
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"mientras",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarWhile(e); RESULT=false; :}
     | WHILE PARENTESIS_A condicion error:e bloque
     {: RESULT=false; :} ;
-ciclo_hacer_mientras ::= DO inicio_ciclo bloque:r WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C PUNTO_COMA
+ciclo_hacer_mientras ::= DO inicio_ciclo inicio_do bloque:r WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C PUNTO_COMA
     {: parser.getTablaSimbolos().cerrarCiclo();
-       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"hacer-mientras",e,kwleft+1,kwright+1); RESULT=r; :} ;
-ciclo_para ::= FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA actualizacion_para PARENTESIS_C bloque
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"hacer-mientras",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarDoWhile(e); RESULT=r; :} ;
+ciclo_para ::= FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA comienzo_actualizacion_for actualizacion_para PARENTESIS_C comienzo_cuerpo_for bloque
     {: parser.getTablaSimbolos().cerrarFor();
-       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1); RESULT=false; :}
-    | FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA PARENTESIS_C bloque
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarFor(e); RESULT=false; :}
+    | FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA comienzo_actualizacion_for PARENTESIS_C comienzo_cuerpo_for bloque
     {: parser.getTablaSimbolos().cerrarFor();
-       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1); RESULT=false; :} ;
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1);
+       parser.getTablaSimbolos().getCodigoIntermedio().finalizarFor(e); RESULT=false; :} ;
 actualizacion_para ::= IDENTIFICADOR:n IGUAL expresion:e
     {: parser.getTablaSimbolos().asignar(n,e,nleft+1,nright+1); :} ;
 lectura ::= LEER PARENTESIS_A lista_identificadores:ids PARENTESIS_C PUNTO_COMA

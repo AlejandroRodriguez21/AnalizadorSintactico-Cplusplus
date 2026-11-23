@@ -15,6 +15,7 @@ public class TablaSimbolos {
     }
     public static class FirmaMetodo {
         public final String nombre, clase, retorno, acceso;
+        public String etiqueta;
         public final int linea, columna;
         public final List<String> parametros = new ArrayList<>();
         public FirmaMetodo(String n, String c, String t, String a, int l, int col) {
@@ -40,34 +41,71 @@ public class TablaSimbolos {
     public String ambitoActual() { return ambitos.peek(); }
     public String claseActual() { return claseActual; }
     public void cambiarAcceso(String acceso) { accesoActual=acceso; }
-
+    
     public void abrirClase(String id, int linea, int columna) {
-        registrar(id,"CLASE",id,"N/A",linea,columna);
-        claseActual=id;
+        registrar(id, "CLASE", id, "N/A", linea, columna);
+        codigoIntermedio.abrirClase(id);
+        claseActual = id;
         ambitos.push(id);
-        accesoActual="private";
+        accesoActual = "private";
     }
-    public void cerrarClase() { ambitos.pop(); claseActual=null; }
 
-    public void abrirMetodo(String nombre, String retorno, int linea, int columna) {
-        String clave=claseActual+"|"+nombre;
-        List<FirmaMetodo> versiones=firmas.computeIfAbsent(clave,k->new ArrayList<>());
-        metodoActual=new FirmaMetodo(nombre,claseActual,retorno,accesoActual,linea,columna);
+    public void cerrarClase() {
+        codigoIntermedio.cerrarClase(claseActual);
+        ambitos.pop();
+        claseActual = null;
+    }
+
+    public void abrirMetodo(String nombre, String retorno,
+                            int linea, int columna) {
+        String clave = claseActual + "|" + nombre;
+
+        List<FirmaMetodo> versiones =
+                firmas.computeIfAbsent(clave, k -> new ArrayList<>());
+
+        metodoActual = new FirmaMetodo(
+                nombre, claseActual, retorno, accesoActual, linea, columna);
+
         versiones.add(metodoActual);
-        if (simbolos.containsKey(claseActual+"|"+nombre) && versiones.size()==1) {
-            error(linea,columna,nombre,"El nombre del metodo ya pertenece a un atributo de la clase.");
+
+        metodoActual.etiqueta = "M_" + claseActual + "_"
+                + nombre + "_" + versiones.size();
+
+        codigoIntermedio.abrirMetodo(metodoActual.etiqueta);
+
+        if (simbolos.containsKey(claseActual + "|" + nombre)
+                && versiones.size() == 1) {
+            error(linea, columna, nombre,
+                    "El nombre del metodo ya pertenece a un atributo de la clase.");
         }
-        String key=clave+(versiones.size()==1?"":"#"+versiones.size());
-        simbolos.put(key,new Simbolo(nombre,"METODO",retorno,"N/A",claseActual,linea,columna,"IDENTIFICADOR"));
-        accesos.put(key,accesoActual);
-        String scope=claseActual+"."+nombre+(versiones.size()==1?"":"#"+versiones.size());
+
+        String key = clave + (versiones.size() == 1
+                ? "" : "#" + versiones.size());
+
+        simbolos.put(key, new Simbolo(
+                nombre, "METODO", retorno, "N/A", claseActual,
+                linea, columna, "IDENTIFICADOR"));
+
+        accesos.put(key, accesoActual);
+
+        String scope = claseActual + "." + nombre
+                + (versiones.size() == 1 ? "" : "#" + versiones.size());
+
         ambitos.push(scope);
-        primerBloqueMetodo=true;
+        primerBloqueMetodo = true;
     }
-    public void registrarParametro(String nombre,String tipo,int linea,int columna) {
-        if(metodoActual!=null) metodoActual.parametros.add(tipo);
-        registrar(nombre,"VARIABLE",tipo,"N/A (Parametro)",linea,columna);
+
+    public void registrarParametro(String nombre, String tipo,
+                                   int linea, int columna) {
+        if (metodoActual != null)
+            metodoActual.parametros.add(tipo);
+
+        registrar(nombre, "VARIABLE", tipo,
+                "N/A (Parametro)", linea, columna);
+
+        codigoIntermedio.parametro(nombre, tipo);
     }
+
     public void finalizarFirma() {
         if (metodoActual==null) return;
         List<FirmaMetodo> lista=firmas.get(metodoActual.clase+"|"+metodoActual.nombre);
@@ -98,12 +136,24 @@ public class TablaSimbolos {
         // Un return escrito cubre ese camino; su incompatibilidad ya se reporto.
         return metodoActual!=null;
     }
+    
     public void cerrarMetodo(boolean retorna) {
-        if(metodoActual!=null && !"void".equals(metodoActual.retorno) && !retorna)
-            error(metodoActual.linea,metodoActual.columna,metodoActual.nombre,
-                "El metodo '"+metodoActual.nombre+"' requiere retorno valido en todos los caminos de ejecucion.");
-        ambitos.pop(); primerBloqueMetodo=false; metodoActual=null;
+        if (metodoActual != null
+                && !"void".equals(metodoActual.retorno)
+                && !retorna) {
+            error(metodoActual.linea, metodoActual.columna,
+                    metodoActual.nombre,
+                    "El metodo '" + metodoActual.nombre
+                    + "' requiere retorno valido en todos los caminos de ejecucion.");
+        }
+
+        codigoIntermedio.cerrarMetodo();
+
+        ambitos.pop();
+        primerBloqueMetodo = false;
+        metodoActual = null;
     }
+
 
     public ManejadorTipos.Expresion llamarMetodo(String objeto,String nombre,
             List<ManejadorTipos.Expresion> args,int linea,int columna) {
@@ -134,7 +184,14 @@ public class TablaSimbolos {
             for(int i=0;i<args.size();i++) {
                 if(!ManejadorTipos.asignable(f.parametros.get(i),args.get(i).tipo)) compatible=false;
             }
-            if(compatible) return ManejadorTipos.llamada(f.retorno,llamada);
+            
+            if (compatible) {
+                return ManejadorTipos.llamada(
+                        f.retorno,
+                        llamada,
+                        CodigoIntermedio.Nodo.llamada(
+                                f.etiqueta, args, objeto));
+            }
         }
         FirmaMetodo f=visibles.get(0);
         if(f.parametros.size()!=args.size()) {
@@ -195,13 +252,21 @@ public class TablaSimbolos {
         destino.valor=valor.texto;
         codigoIntermedio.asignar(obj + "." + miembro, valor);
     }
-    public void registrarObjeto(String clase,String nombre,int linea,int columna) {
-        if(!simbolos.containsKey("GLOBAL|"+clase)) {
-            error(linea,columna,clase,"La clase '"+clase+"' no esta declarada.");
+    
+    public void registrarObjeto(String clase, String nombre,
+                                int linea, int columna) {
+        if (!simbolos.containsKey("GLOBAL|" + clase)) {
+            error(linea, columna, clase,
+                    "La clase '" + clase + "' no esta declarada.");
             return;
         }
-        registrar(nombre,"VARIABLE",clase,"N/A (Objeto)",linea,columna);
+
+        registrar(nombre, "VARIABLE", clase,
+                "N/A (Objeto)", linea, columna);
+
+        codigoIntermedio.crearObjeto(nombre, clase);
     }
+
 
     public void abrirBloque() {
         if(primerBloqueMetodo) { primerBloqueMetodo=false; aperturasBloque.push(false); }

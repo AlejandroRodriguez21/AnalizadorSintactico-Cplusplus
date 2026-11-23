@@ -1,0 +1,37 @@
+
+class ControlIncorrecto {
+    public:
+
+    int sumar(int a, int b) {
+        retornar a + b;
+    }
+
+    void ejecutar() {
+        int x = 0;
+
+        si (x) {
+            x = x + 1;
+        }
+
+        mientras ("texto") {
+            x = x + 1;
+        }
+
+        x = sumar(1);
+        x = metodoInexistente(2);
+
+        romper;
+        continue;
+
+        segun (x) {
+            caso 1:
+                x = x + 1;
+                romper;
+            caso 1:
+                x = x + 2;
+                romper;
+            defecto:
+                x = x + 3;
+        }
+    }
+}

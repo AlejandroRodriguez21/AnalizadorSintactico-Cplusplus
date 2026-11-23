@@ -25,10 +25,13 @@ public class ManejadorTipos {
         return new Expresion(tipo, nombre, CodigoIntermedio.Nodo.variable(nombre));
     }
 
-    /** Las llamadas conservan el analisis semantico; su traduccion queda fuera de esta practica. */
-    public static Expresion llamada(String tipo, String texto) {
-        return new Expresion(tipo, texto, null);
+    
+    /** Conserva el tipo y el nodo necesario para emitir parametros y call. */
+    public static Expresion llamada(String tipo, String texto,
+                                    CodigoIntermedio.Nodo nodo) {
+        return new Expresion(tipo, texto, nodo);
     }
+
 
     public static Expresion agrupar(Expresion expresion) {
         return new Expresion(expresion.tipo, "(" + expresion.texto + ")", expresion.nodo);

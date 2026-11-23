@@ -1,0 +1,64 @@
+
+
+class Calculadora {
+    public:
+    int base = 10;
+
+    int sumar(int a, int b) {
+        retornar a + b;
+    }
+
+    void ejecutar() {
+        int x = 0;
+        bool cond = verdadero;
+
+        si (x < 3) {
+            x = x + 1;
+        } sino {
+            x = x + 2;
+        }
+
+        mientras (x < 5) {
+            x = x + 1;
+
+            si (x == 4) {
+                continue;
+            }
+
+            romper;
+        }
+
+        para (int i = 0; i < 3; i = i + 1) {
+            x = x + i;
+
+            si (i == 2) {
+                romper;
+            }
+        }
+
+        hacer {
+            x = x + 1;
+        } mientras (x < 8);
+
+        segun (x) {
+            caso 1:
+                x = x + 1;
+                romper;
+            caso 2:
+                x = x + 2;
+                romper;
+            defecto:
+                x = x + 3;
+        }
+
+        int resultado = sumar(3, 4);
+    }
+}
+
+class Uso {
+    public:
+    void iniciar() {
+        Calculadora c;
+        int valor = c.sumar(1, 2);
+    }
+}

@@ -1,0 +1,30 @@
+
+class ControlAnidado {
+    public:
+
+    void mostrar(int numero) {
+        escribir(numero);
+        retornar;
+    }
+
+    void ejecutar() {
+        int x = 0;
+
+        mientras (x < 2) {
+            segun (x) {
+                caso 0:
+                    x = x + 1;
+                    continue;
+                caso 1:
+                    romper;
+            }
+            x = x + 1;
+        }
+
+        para (int i = 0; i < 2;) {
+            i = i + 1;
+        }
+
+        mostrar(x);
+    }
+}
