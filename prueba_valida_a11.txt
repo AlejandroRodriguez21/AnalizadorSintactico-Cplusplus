@@ -1,0 +1,50 @@
+class Calculadora {
+    public:
+    int base = 10;
+    bool activo = verdadero;
+
+    int sumar(int a, int b) {
+        retornar a + b;
+    }
+    bool esMayor(int valor) {
+        retornar valor > base;
+    }
+    int elegir(int numero) {
+        si (numero > 0) {
+            retornar numero;
+        } sino {
+            retornar 0;
+        }
+    }
+    void ejecutar() {
+        int resultado = sumar(10, 20);
+        bool condicion = esMayor(resultado);
+        si (condicion) {
+            escribir(resultado);
+        } sino {
+            escribir(base);
+        }
+        int contador = 0;
+        mientras (contador < 3) {
+            contador = contador + 1;
+            continue;
+        }
+        para (int i = 0; i < 2; i = i + 1) {
+            romper;
+        }
+        segun (resultado) {
+            caso 1: romper;
+            defecto: romper;
+        }
+    }
+}
+class Consulta {
+    public:
+    void mostrar() {
+        Calculadora cuenta;
+        int valor = cuenta.base;
+        int total = cuenta.sumar(3, 4);
+        escribir(valor);
+        escribir(total);
+    }
+}

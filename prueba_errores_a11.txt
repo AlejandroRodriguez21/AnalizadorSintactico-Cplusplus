@@ -1,0 +1,50 @@
+class CalculadoraErrores {
+    int oculto = 3;
+    public:
+    int base = 10;
+    int sumar(int a, int b) {
+        retornar a + b;
+    }
+    int obtenerEdad() {
+        retornar "veinticinco";
+    }
+    int sinRetorno(int numero) {
+        si (numero > 0) {
+            retornar numero;
+        }
+    }
+    void ejecutar() {
+        int resultado = 0;
+        si (resultado) {
+            escribir("Error");
+        }
+        resultado = sumar(10);
+        resultado = sumar("Hola", 20);
+        resultado = sumar(10, 20, 30);
+        resultado = multiplicar(2, 3);
+        romper;
+        continue;
+        {
+            int valorLocal = 100;
+        }
+        resultado = valorLocal;
+        resultado = limite;
+    }
+}
+class PruebaAcceso {
+    public:
+    void probar() {
+        CalculadoraErrores c;
+        int ok = c.base;
+        int malo = c.oculto;
+        int otro = c.inexistente;
+        ClaseDesconocida obj;
+    }
+}
+class Duplicada {
+    public:
+    int valor = 1;
+    int valor = 2;
+}
+class Duplicada {
+}

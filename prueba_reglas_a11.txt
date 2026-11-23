@@ -1,0 +1,21 @@
+class Servicio {
+    public:
+    int contar(int dato) {
+        retornar dato;
+    }
+    float contar(float dato) {
+        retornar dato;
+    }
+    void ejecutar() {
+        int uno = contar(3);
+        float dos = contar(2.5);
+        int i = 0;
+        mientras (i < 2) {
+            i = i + 1;
+            romper;
+        }
+        para (int k = 0; k < 2; k = k + 1) {
+            continue;
+        }
+    }
+}

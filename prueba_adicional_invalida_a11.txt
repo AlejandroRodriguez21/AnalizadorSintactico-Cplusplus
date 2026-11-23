@@ -1,0 +1,34 @@
+class Revisiones {
+    public:
+    int obtener() {
+        retornar;
+    }
+    void aviso() {
+        retornar 5;
+    }
+    int doble(int x) {
+        retornar x * 2;
+    }
+    int doble(int y) {
+        retornar y;
+    }
+    void prueba() {
+        int valor = 4;
+        mientras ("texto") {
+            romper;
+        }
+        para (int i = 0; i < 3; i = i + 1) {
+            valor = valor + 1;
+        }
+        valor = i;
+        para (int indice = 0; indice + 2; indice = indice + 1) {
+            romper;
+        }
+        segun (2.5) {
+            caso 1: romper;
+            caso 1: romper;
+            defecto: romper;
+        }
+    }
+    retornar 1;
+}

@@ -1,4 +1,3 @@
-
 /* CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO */
 package ManejoErrores;
 import java_cup.runtime.*;
@@ -41,18 +40,18 @@ terminal Double DECIMAL;
 terminal TRUE, FALSE;
 
 /* NO TERMINALES ORIGINALES Y DE ACTIVIDADES 7-8 */
-non terminal archivo, paquete_opcional, lista_importaciones, importacion, clase_principal;
-non terminal cuerpo_clase, lista_elementos_clase, elemento_clase;
+non terminal archivo, paquete_opcional, lista_importaciones, importacion, clase_principal, lista_clases;
+non terminal cuerpo_clase, lista_elementos_clase, elemento_clase, modificador_acceso, declaracion_objeto;
 non terminal atributo_variable, constante;
 non terminal String tipo_dato, valor;
 non terminal ManejoErrores.ManejadorTipos.Expresion expresion, condicion;
 non terminal java.util.List lista_identificadores;
-non terminal lista_sentencias, sentencia, bloque;
+non terminal Boolean lista_sentencias, sentencia, bloque, retorno, estructura_control, seleccion_simple, seleccion_doble, seleccion_multiple, ciclo_mientras, ciclo_hacer_mientras, ciclo_para;
 non terminal lectura, escritura, asignacion, lista_elementos;
-non terminal estructura_control, seleccion_simple, seleccion_doble, seleccion_multiple, lista_casos, caso, defecto;
-non terminal ciclo_mientras, ciclo_hacer_mientras, ciclo_para, actualizacion_para, dec_var_local;
+non terminal lista_casos, caso, defecto, cabecera_switch;
+non terminal actualizacion_para, dec_var_local, inicio_ciclo, inicio_for, fin_firma;
 non terminal metodo, cabecera_metodo, parametros_optativos, lista_parametros, parametro, inicio_bloque;
-non terminal lista_argumentos_optativos, lista_argumentos, retorno;
+non terminal java.util.List lista_argumentos_optativos, lista_argumentos;
 non terminal ManejoErrores.ManejadorTipos.Expresion llamada_metodo;
 
 precedence right IGUAL;
@@ -66,17 +65,15 @@ precedence left ELSE;
 
 start with archivo;
 
-archivo ::= paquete_opcional lista_importaciones clase_principal
+archivo ::= paquete_opcional lista_importaciones lista_clases
           {: System.out.println("Analisis sintactico finalizado correctamente"); :} ;
-
-paquete_opcional ::= USING NAMESPACE IDENTIFICADOR PUNTO_COMA
-                   | USING NAMESPACE STD PUNTO_COMA
-                   | /* vacio */ ;
-
+paquete_opcional ::= USING NAMESPACE IDENTIFICADOR PUNTO_COMA | USING NAMESPACE STD PUNTO_COMA | /* vacio */ ;
 lista_importaciones ::= lista_importaciones importacion | /* vacio */ ;
 importacion ::= IMPORT IDENTIFICADOR PUNTO_COMA ;
 
-/* ACTIVIDAD 9: registrar la clase antes de procesar su contenido. */
+lista_clases ::= lista_clases clase_principal | clase_principal ;
+
+/* Registro de clases y ambitos: actividades 9 y 11. */
 clase_principal ::= CLASS IDENTIFICADOR:n LLAVE_A
                 {: parser.getTablaSimbolos().abrirClase(n, nleft + 1, nright + 1); :}
                 cuerpo_clase LLAVE_C
@@ -86,10 +83,14 @@ clase_principal ::= CLASS IDENTIFICADOR:n LLAVE_A
 
 cuerpo_clase ::= lista_elementos_clase | /* vacio */ ;
 lista_elementos_clase ::= lista_elementos_clase elemento_clase | elemento_clase ;
-
-elemento_clase ::= atributo_variable
+modificador_acceso ::= PUBLIC DOS_PUNTOS {: parser.getTablaSimbolos().cambiarAcceso("public"); :}
+                   | PRIVATE DOS_PUNTOS {: parser.getTablaSimbolos().cambiarAcceso("private"); :}
+                   | PROTECTED DOS_PUNTOS {: parser.getTablaSimbolos().cambiarAcceso("protected"); :} ;
+elemento_clase ::= modificador_acceso
+                 | atributo_variable
                  | constante
                  | metodo
+                 | retorno
                  | tipo_dato IDENTIFICADOR error:e bloque
                    {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '(' despues del nombre del metodo."); :}
                  | VOID IDENTIFICADOR error:e bloque
@@ -98,10 +99,10 @@ elemento_clase ::= atributo_variable
                    {: System.err.println("-> Recuperacion: Declaracion de clase invalida."); :} ;
 
 /* ACTIVIDAD 8: metodos. ACTIVIDAD 9: registro de su nombre y ambito. */
-metodo ::= cabecera_metodo parametros_optativos PARENTESIS_C bloque
-         {: parser.getTablaSimbolos().cerrarMetodo();
+metodo ::= cabecera_metodo parametros_optativos PARENTESIS_C fin_firma bloque:devuelve
+         {: parser.getTablaSimbolos().cerrarMetodo(devuelve);
             System.out.println("Regla reconocida: definicion_metodo"); :} ;
-
+fin_firma ::= /* vacio */ {: parser.getTablaSimbolos().finalizarFirma(); :} ;
 cabecera_metodo ::= tipo_dato:t IDENTIFICADOR:n PARENTESIS_A
          {: parser.getTablaSimbolos().abrirMetodo(n, t, nleft + 1, nright + 1); :}
          | VOID IDENTIFICADOR:n PARENTESIS_A
@@ -111,121 +112,120 @@ parametros_optativos ::= lista_parametros
                        {: System.out.println("Regla reconocida: metodo_con_parametros"); :}
                        | /* vacio */
                        {: System.out.println("Regla reconocida: metodo_sin_parametros"); :} ;
-
 lista_parametros ::= lista_parametros COMA parametro
                    | lista_parametros COMA error:e
                      {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un parametro despues de ','."); :}
                    | parametro
                      {: System.out.println("Regla reconocida: lista_parametros"); :} ;
-
 parametro ::= tipo_dato:t IDENTIFICADOR:n
-            {: parser.getTablaSimbolos().registrar(n, "VARIABLE", t,
-                    "N/A (Parametro)", nleft + 1, nright + 1); :}
+            {: parser.getTablaSimbolos().registrarParametro(n,t,nleft+1,nright+1); :}
             | tipo_dato error:e
               {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba un identificador para el parametro."); :} ;
 
-llamada_metodo ::= IDENTIFICADOR:n PARENTESIS_A lista_argumentos_optativos PARENTESIS_C
-                 {: Simbolo metodoLlamado = parser.getTablaSimbolos().buscarUso(n, nleft + 1, nright + 1);
-                    RESULT = ManejadorTipos.literal(
-                            metodoLlamado == null ? "ERROR" : metodoLlamado.tipodato,
-                            n + "(...)");
-                    System.out.println("Regla reconocida: llamada_metodo"); :} ;
+/* Firmas y tipos de argumentos, incluidos accesos mediante objeto. */
+llamada_metodo ::= IDENTIFICADOR:n PARENTESIS_A lista_argumentos_optativos:args PARENTESIS_C
+    {: RESULT=parser.getTablaSimbolos().llamarMetodo(null,n,args,nleft+1,nright+1);
+       System.out.println("Regla reconocida: llamada_metodo"); :}
+    | IDENTIFICADOR:obj PUNTO IDENTIFICADOR:n PARENTESIS_A lista_argumentos_optativos:args PARENTESIS_C
+    {: RESULT=parser.getTablaSimbolos().llamarMetodo(obj,n,args,nleft+1,nright+1);
+       System.out.println("Regla reconocida: llamada_metodo"); :} ;
+lista_argumentos_optativos ::= lista_argumentos:args {: RESULT=args; :}
+    | /* vacio */ {: RESULT=new java.util.ArrayList(); :} ;
+lista_argumentos ::= expresion:e
+    {: java.util.List args=new java.util.ArrayList(); args.add(e); RESULT=args;
+       System.out.println("Regla reconocida: lista_argumentos"); :}
+    | lista_argumentos:args COMA expresion:e
+    {: args.add(e); RESULT=args; :}
+    | lista_argumentos:args COMA error:e
+    {: System.err.println("Error sintactico en linea "+(eleft+1)+": argumento incompleto."); RESULT=args; :} ;
+retorno ::= RETURN:op expresion:e PUNTO_COMA
+    {: parser.getTablaSimbolos().validarRetorno(e,opleft+1,opright+1);
+       RESULT=parser.getTablaSimbolos().retornoValido(e);
+       System.out.println("Regla reconocida: retorno con expresion"); :}
+    | RETURN:op PUNTO_COMA
+    {: parser.getTablaSimbolos().validarRetorno(null,opleft+1,opright+1);
+       RESULT=parser.getTablaSimbolos().retornoValido(null);
+       System.out.println("Regla reconocida: retorno sin expresion"); :}
+    | RETURN error:e PUNTO_COMA
+    {: System.err.println("Error sintactico en linea "+(eleft+1)+": retorno mal formado."); RESULT=false; :} ;
 
-lista_argumentos_optativos ::= lista_argumentos | /* vacio */ ;
-
-lista_argumentos ::= expresion
-                   {: System.out.println("Regla reconocida: lista_argumentos"); :}
-                   | lista_argumentos COMA expresion
-                   | lista_argumentos COMA error:e
-                     {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba una expresion despues de ','."); :} ;
-
-retorno ::= RETURN expresion PUNTO_COMA
-          {: System.out.println("Regla reconocida: retorno con expresion"); :}
-          | RETURN PUNTO_COMA
-          {: System.out.println("Regla reconocida: retorno sin expresion"); :}
-          | RETURN error:e PUNTO_COMA
-          {: System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba una expresion despues de 'retornar'."); :} ;
-
-/* ACTIVIDAD 9: aislar bloques anidados y conservar el ambito del cuerpo del metodo. */
-inicio_bloque ::= /* vacio */
-               {: parser.getTablaSimbolos().abrirBloque(); :} ;
-
-bloque ::= LLAVE_A inicio_bloque lista_sentencias LLAVE_C
-         {: parser.getTablaSimbolos().cerrarBloque();
-            System.out.println("Regla reconocida: bloque"); :}
-       | LLAVE_A inicio_bloque lista_sentencias error:e
-         {: parser.getTablaSimbolos().cerrarBloque();
-            System.err.println("Error sintactico en linea " + (eleft + 1) + ": se esperaba '}' para cerrar el bloque."); :} ;
-
-lista_sentencias ::= lista_sentencias sentencia | /* vacio */ ;
-
-sentencia ::= lectura
-            | escritura
-            | asignacion
-            | dec_var_local
-            | estructura_control
-            | retorno
-            | llamada_metodo PUNTO_COMA
+/* Garantia de retorno para caminos de control, conservando ambitos. */
+inicio_bloque ::= /* vacio */ {: parser.getTablaSimbolos().abrirBloque(); :} ;
+bloque ::= LLAVE_A inicio_bloque lista_sentencias:r LLAVE_C
+    {: parser.getTablaSimbolos().cerrarBloque(); RESULT=r;
+       System.out.println("Regla reconocida: bloque"); :}
+    | LLAVE_A inicio_bloque lista_sentencias:r error:e
+    {: parser.getTablaSimbolos().cerrarBloque(); RESULT=false;
+       System.err.println("Error sintactico en linea "+(eleft+1)+": se esperaba '}'."); :} ;
+lista_sentencias ::= lista_sentencias:a sentencia:b {: RESULT=a || b; :}
+                  | /* vacio */ {: RESULT=false; :} ;
+sentencia ::= lectura {: RESULT=false; :}
+            | escritura {: RESULT=false; :}
+            | asignacion {: RESULT=false; :}
+            | declaracion_objeto {: RESULT=false; :}
+            | dec_var_local {: RESULT=false; :}
+            | estructura_control:e {: RESULT=e; :}
+            | retorno:r {: RESULT=r; :}
+            | llamada_metodo PUNTO_COMA {: RESULT=false; :}
             | IDENTIFICADOR PARENTESIS_A lista_argumentos_optativos error PUNTO_COMA
-              {: System.err.println("Error sintactico: se esperaba ')' al finalizar los argumentos."); :}
+              {: System.err.println("Error sintactico: se esperaba ')' al finalizar los argumentos."); RESULT=false; :}
             | IDENTIFICADOR PUNTO_COMA
-              {: System.err.println("Error sintactico: se esperaba '(' para iniciar la llamada al metodo."); :}
-            | BREAK PUNTO_COMA
+              {: System.err.println("Error sintactico: se esperaba '(' para iniciar la llamada al metodo."); RESULT=false; :}
+            | BREAK:kw PUNTO_COMA
+              {: parser.getTablaSimbolos().validarBreak(kwleft+1,kwright+1); RESULT=false; :}
+            | CONTINUE:kw PUNTO_COMA
+              {: parser.getTablaSimbolos().validarContinue(kwleft+1,kwright+1); RESULT=false; :}
+            | bloque:r {: RESULT=r; :}
             | ELSE bloque
-              {: System.err.println("Error sintactico: 'sino' no puede aparecer sin una estructura 'si' asociada."); :}
+              {: System.err.println("Error sintactico: 'sino' sin 'si'."); RESULT=false; :}
             | error PUNTO_COMA
-              {: System.err.println("-> Recuperacion: Se omitio una sentencia invalida anclada al ';'."); :} ;
+              {: System.err.println("-> Recuperacion: Se omitio sentencia invalida."); RESULT=false; :} ;
 
-estructura_control ::= seleccion_simple
-                     | seleccion_doble
-                     | seleccion_multiple
-                     | ciclo_mientras
-                     | ciclo_hacer_mientras
-                     | ciclo_para ;
-
-condicion ::= expresion:e {: RESULT = e; :} ;
-
-seleccion_simple ::= IF:inicio PARENTESIS_A condicion:e PARENTESIS_C bloque
-                {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "si", e,
-                     inicioleft + 1, inicioright + 1); :} ;
-
-seleccion_doble ::= IF:inicio PARENTESIS_A condicion:e PARENTESIS_C bloque ELSE bloque
-                {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "si", e,
-                     inicioleft + 1, inicioright + 1); :} ;
-
-seleccion_multiple ::= SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos defecto LLAVE_C
-                   | SWITCH PARENTESIS_A expresion PARENTESIS_C LLAVE_A lista_casos LLAVE_C ;
-
+declaracion_objeto ::= IDENTIFICADOR:tipo IDENTIFICADOR:n PUNTO_COMA
+    {: parser.getTablaSimbolos().registrarObjeto(tipo,n,nleft+1,nright+1); :} ;
+estructura_control ::= seleccion_simple:r {: RESULT=r; :}
+                     | seleccion_doble:r {: RESULT=r; :}
+                     | seleccion_multiple:r {: RESULT=r; :}
+                     | ciclo_mientras:r {: RESULT=r; :}
+                     | ciclo_hacer_mientras:r {: RESULT=r; :}
+                     | ciclo_para:r {: RESULT=r; :} ;
+condicion ::= expresion:e {: RESULT=e; :} ;
+seleccion_simple ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C bloque
+    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1); RESULT=false; :} ;
+seleccion_doble ::= IF:kw PARENTESIS_A condicion:e PARENTESIS_C bloque:a ELSE bloque:b
+    {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"si",e,kwleft+1,kwright+1); RESULT=a && b; :} ;
+cabecera_switch ::= SWITCH:kw PARENTESIS_A expresion:e PARENTESIS_C LLAVE_A
+    {: parser.getTablaSimbolos().abrirSwitch(e,kwleft+1,kwright+1); :} ;
+seleccion_multiple ::= cabecera_switch lista_casos defecto LLAVE_C
+    {: parser.getTablaSimbolos().cerrarSwitch(); RESULT=false; :}
+    | cabecera_switch lista_casos LLAVE_C
+    {: parser.getTablaSimbolos().cerrarSwitch(); RESULT=false; :} ;
 lista_casos ::= lista_casos caso | caso ;
-caso ::= CASE valor DOS_PUNTOS lista_sentencias
-       | CASE error:e DOS_PUNTOS lista_sentencias ;
+caso ::= CASE:kw valor:v DOS_PUNTOS lista_sentencias
+    {: parser.getTablaSimbolos().registrarCaso(v,kwleft+1,kwright+1); :}
+    | CASE error DOS_PUNTOS lista_sentencias ;
 defecto ::= DEFAULT DOS_PUNTOS lista_sentencias ;
-
-ciclo_mientras ::= WHILE:inicio PARENTESIS_A condicion:e PARENTESIS_C bloque
-                {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "mientras", e,
-                     inicioleft + 1, inicioright + 1); :}
-                | WHILE PARENTESIS_A condicion error:e bloque ;
-
-ciclo_hacer_mientras ::= DO bloque WHILE:inicio PARENTESIS_A condicion:e PARENTESIS_C PUNTO_COMA
-                {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "mientras", e,
-                     inicioleft + 1, inicioright + 1); :} ;
-
-ciclo_para ::= FOR:inicio PARENTESIS_A dec_var_local condicion:e PUNTO_COMA actualizacion_para PARENTESIS_C bloque
-           {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "para", e,
-                     inicioleft + 1, inicioright + 1); :}
-           | FOR:inicio PARENTESIS_A dec_var_local condicion:e PUNTO_COMA PARENTESIS_C bloque
-           {: ManejadorTipos.validarCondicion(parser.getTablaSimbolos(), "para", e,
-                     inicioleft + 1, inicioright + 1); :} ;
-
+inicio_ciclo ::= /* vacio */ {: parser.getTablaSimbolos().abrirCiclo(); :} ;
+inicio_for ::= /* vacio */ {: parser.getTablaSimbolos().abrirFor(); :} ;
+ciclo_mientras ::= WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C inicio_ciclo bloque
+    {: parser.getTablaSimbolos().cerrarCiclo();
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"mientras",e,kwleft+1,kwright+1); RESULT=false; :}
+    | WHILE PARENTESIS_A condicion error:e bloque
+    {: RESULT=false; :} ;
+ciclo_hacer_mientras ::= DO inicio_ciclo bloque:r WHILE:kw PARENTESIS_A condicion:e PARENTESIS_C PUNTO_COMA
+    {: parser.getTablaSimbolos().cerrarCiclo();
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"hacer-mientras",e,kwleft+1,kwright+1); RESULT=r; :} ;
+ciclo_para ::= FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA actualizacion_para PARENTESIS_C bloque
+    {: parser.getTablaSimbolos().cerrarFor();
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1); RESULT=false; :}
+    | FOR:kw PARENTESIS_A inicio_for dec_var_local condicion:e PUNTO_COMA PARENTESIS_C bloque
+    {: parser.getTablaSimbolos().cerrarFor();
+       ManejadorTipos.validarCondicion(parser.getTablaSimbolos(),"para",e,kwleft+1,kwright+1); RESULT=false; :} ;
 actualizacion_para ::= IDENTIFICADOR:n IGUAL expresion:e
-                     {: parser.getTablaSimbolos().asignar(n, e, nleft + 1, nright + 1); :} ;
-
+    {: parser.getTablaSimbolos().asignar(n,e,nleft+1,nright+1); :} ;
 lectura ::= LEER PARENTESIS_A lista_identificadores:ids PARENTESIS_C PUNTO_COMA
-          {: for (Object obj : ids) {
-                 TablaSimbolos.Referencia r = (TablaSimbolos.Referencia) obj;
-                 parser.getTablaSimbolos().verificarUso(r.id, r.linea, r.columna);
-             } :} ;
-
+    {: for(Object obj:ids) { TablaSimbolos.Referencia r=(TablaSimbolos.Referencia)obj;
+         parser.getTablaSimbolos().verificarUso(r.id,r.linea,r.columna); } :} ;
 escritura ::= ESCRIBIR PARENTESIS_A lista_elementos PARENTESIS_C PUNTO_COMA ;
 
 /* Las variables locales requieren inicializacion; los atributos no. */
@@ -239,10 +239,10 @@ dec_var_local ::= tipo_dato:t IDENTIFICADOR:n IGUAL expresion:v PUNTO_COMA
                          "La variable local '" + n + "' debe ser inicializada en su declaracion.");
                    parser.getTablaSimbolos().registrar(n, "VARIABLE", t,
                          "sin_inicializar", nleft + 1, nright + 1); :} ;
-
 asignacion ::= IDENTIFICADOR:n IGUAL expresion:e PUNTO_COMA
-             {: parser.getTablaSimbolos().asignar(n, e, nleft + 1, nright + 1); :} ;
-
+             {: parser.getTablaSimbolos().asignar(n,e,nleft+1,nright+1); :}
+             | IDENTIFICADOR:obj PUNTO IDENTIFICADOR:n IGUAL expresion:e PUNTO_COMA
+             {: parser.getTablaSimbolos().asignarAtributo(obj,n,e,nleft+1,nright+1); :} ;
 lista_elementos ::= expresion | lista_elementos COMA expresion ;
 
 /* ACTIVIDAD 10: los no terminales propagan tipo y representacion textual. */
@@ -276,6 +276,8 @@ expresion ::= expresion:a MAS:op expresion:b
             {: RESULT = ManejadorTipos.relacional(parser.getTablaSimbolos(), "!=", a, b, opleft + 1, opright + 1); :}
             | PARENTESIS_A expresion:e PARENTESIS_C
             {: RESULT = ManejadorTipos.literal(e.tipo, "(" + e.texto + ")"); :}
+            | IDENTIFICADOR:obj PUNTO IDENTIFICADOR:n
+            {: RESULT = parser.getTablaSimbolos().accederAtributo(obj,n,nleft+1,nright+1); :}
             | IDENTIFICADOR:n
             {: RESULT = ManejadorTipos.identificador(parser.getTablaSimbolos(), n, nleft + 1, nright + 1); :}
             | ENTERO:n {: RESULT = ManejadorTipos.literal("int", String.valueOf(n)); :}
@@ -291,7 +293,6 @@ tipo_dato ::= INT {: RESULT = "int"; :}
             | CHAR {: RESULT = "char"; :}
             | BOOL {: RESULT = "bool"; :}
             | STRING {: RESULT = "string"; :} ;
-
 valor ::= ENTERO:n {: RESULT = String.valueOf(n); :}
         | DECIMAL:n {: RESULT = String.valueOf(n); :}
         | CADENA:n {: RESULT = n; :}
@@ -305,7 +306,6 @@ lista_identificadores ::= IDENTIFICADOR:n
               | lista_identificadores:lista COMA IDENTIFICADOR:n
               {: lista.add(new TablaSimbolos.Referencia(n, nleft + 1, nright + 1));
                  RESULT = lista; :} ;
-
 atributo_variable ::= tipo_dato:t lista_identificadores:ids PUNTO_COMA
               {: for (Object obj : ids) {
                      TablaSimbolos.Referencia r = (TablaSimbolos.Referencia) obj;
@@ -319,7 +319,6 @@ atributo_variable ::= tipo_dato:t lista_identificadores:ids PUNTO_COMA
                      parser.getTablaSimbolos().registrar(r.id, "ATRIBUTO", t,
                          v.texto, r.linea, r.columna);
                  } :} ;
-
 constante ::= CONST tipo_dato:t IDENTIFICADOR:n IGUAL expresion:v PUNTO_COMA
             {: parser.getTablaSimbolos().validarInicializacion(n, t, v, nleft + 1, nright + 1);
                parser.getTablaSimbolos().registrar(n, "CONSTANTE", t, v.texto,

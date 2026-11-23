@@ -1,4 +1,3 @@
-
 package ManejoErrores;
 
 /** Reglas de compatibilidad de tipos para las expresiones de C++. */
@@ -22,6 +21,10 @@ public class ManejadorTipos {
         if (simbolo == null) {
             return literal("ERROR", nombre);
         }
+        if ("METODO".equals(simbolo.tiposimbolo)) {
+            tabla.error(linea, columna, nombre, "El metodo '" + nombre + "' debe invocarse con parentesis.");
+            return literal("ERROR", nombre);
+        }
         return literal(simbolo.tipodato, nombre);
     }
 
@@ -38,31 +41,24 @@ public class ManejadorTipos {
     public static boolean asignable(String destino, String origen) {
         if ("ERROR".equals(origen)) return false;
         if (destino.equals(origen)) return true;
-
-        // Conversion numerica ampliativa.
+        // Conversion numerica ampliativa: int -> float/double, float -> double.
         return ("float".equals(destino) && "int".equals(origen))
-            || ("double".equals(destino) &&
-                ("int".equals(origen) || "float".equals(origen)));
+            || ("double".equals(destino) && ("int".equals(origen) || "float".equals(origen)));
     }
 
     public static Expresion aritmetica(TablaSimbolos tabla, String operador,
             Expresion a, Expresion b, int linea, int columna) {
         String texto = a.texto + " " + operador + " " + b.texto;
-        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo))
-            return literal("ERROR", texto);
-
-        if ("%".equals(operador) &&
-            "int".equals(a.tipo) && "int".equals(b.tipo)) {
+        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo)) return literal("ERROR", texto);
+        if ("%".equals(operador) && "int".equals(a.tipo) && "int".equals(b.tipo)) {
             System.out.println("Tipos: int % int -> int");
             return literal("int", texto);
         }
-
         if (!"%".equals(operador) && numerico(a.tipo) && numerico(b.tipo)) {
             String tipo = promocionar(a.tipo, b.tipo);
             System.out.println("Tipos: " + a.tipo + " " + operador + " " + b.tipo + " -> " + tipo);
             return literal(tipo, texto);
         }
-
         tabla.error(linea, columna, operador,
                 "El operador aritmetico '" + operador + "' no es aplicable a '"
                 + a.tipo + "' y '" + b.tipo + "'.");
@@ -72,21 +68,16 @@ public class ManejadorTipos {
     public static Expresion relacional(TablaSimbolos tabla, String operador,
             Expresion a, Expresion b, int linea, int columna) {
         String texto = a.texto + " " + operador + " " + b.texto;
-        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo))
-            return literal("ERROR", texto);
-
+        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo)) return literal("ERROR", texto);
         boolean compatible = numerico(a.tipo) && numerico(b.tipo);
-
         if ("==".equals(operador) || "!=".equals(operador)) {
             compatible = compatible || (a.tipo.equals(b.tipo)
                     && ("bool".equals(a.tipo) || "string".equals(a.tipo)));
         }
-
         if (compatible) {
             System.out.println("Tipos: " + a.tipo + " " + operador + " " + b.tipo + " -> bool");
             return literal("bool", texto);
         }
-
         tabla.error(linea, columna, operador,
                 "No se pueden comparar los tipos '" + a.tipo + "' y '" + b.tipo
                 + "' con el operador '" + operador + "'.");
@@ -96,14 +87,11 @@ public class ManejadorTipos {
     public static Expresion logica(TablaSimbolos tabla, String operador,
             Expresion a, Expresion b, int linea, int columna) {
         String texto = a.texto + " " + operador + " " + b.texto;
-        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo))
-            return literal("ERROR", texto);
-
+        if ("ERROR".equals(a.tipo) || "ERROR".equals(b.tipo)) return literal("ERROR", texto);
         if ("bool".equals(a.tipo) && "bool".equals(b.tipo)) {
             System.out.println("Tipos: bool " + operador + " bool -> bool");
             return literal("bool", texto);
         }
-
         tabla.error(linea, columna, operador,
                 "El operador logico '" + operador + "' requiere booleanos; se recibieron '"
                 + a.tipo + "' y '" + b.tipo + "'.");
@@ -112,16 +100,12 @@ public class ManejadorTipos {
 
     public static Expresion negacion(TablaSimbolos tabla, Expresion valor,
             int linea, int columna) {
-        if ("ERROR".equals(valor.tipo))
-            return literal("ERROR", "!" + valor.texto);
-
+        if ("ERROR".equals(valor.tipo)) return literal("ERROR", "!" + valor.texto);
         if ("bool".equals(valor.tipo)) {
             System.out.println("Tipos: !bool -> bool");
             return literal("bool", "!" + valor.texto);
         }
-
-        tabla.error(linea, columna, "!",
-                "El operador ! requiere un operando bool y recibio '"
+        tabla.error(linea, columna, "!", "El operador ! requiere un operando bool y recibio '"
                 + valor.tipo + "'.");
         return literal("ERROR", "!" + valor.texto);
     }

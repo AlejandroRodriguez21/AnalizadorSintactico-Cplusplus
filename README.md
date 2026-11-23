@@ -1,72 +1,70 @@
-# Analizador sintáctico y semántico — C++ (Actividad 10)
+# Analizador de C++ — Actividad 11
 
 **Materia:** Traductores de Lenguajes  
-**Práctica:** Actividad 10 — Análisis semántico: verificación de expresiones aritméticas y lógicas  
+**Actividad:** 11 — Análisis semántico y verificación de estructuras de control, métodos y clases  
 **Implementación:** Java, JFlex y JavaCUP  
-**Lenguaje de entrada:** subconjunto didáctico de C++ (con `si`, `escribir`, `retornar`, `verdadero`, `falso`)
+**Lenguaje analizado:** subconjunto educativo de C++ con instrucciones adaptadas al español.
 
 ## Integrantes
+
 - Centeno Domínguez Edgar Yair
 - Ramos Gutiérrez Rodrigo
 - Rodríguez Romero Alejandro
 
 ## Objetivo
 
-Ampliar el analizador de la actividad 9 para comprobar tipos en expresiones aritméticas, relacionales y lógicas; verificar asignaciones e inicializaciones; consultar la tabla de símbolos; y rechazar la reasignación de constantes. Se conservan los analizadores léxico, sintáctico, de métodos, estructuras de control y la tabla dinámica de símbolos.
+Conservar el análisis léxico, sintáctico y semántico de las actividades anteriores y extender las verificaciones a los contextos de control, las firmas y retornos de métodos, los miembros de clases y la resolución de identificadores por ámbito.
 
-C++ es un lenguaje de **tipado estático**: el tipo de un identificador queda determinado por su declaración. A diferencia de un lenguaje dinámicamente tipado, una asignación no cambia el tipo declarado.
+## Funcionalidades incorporadas en la actividad 11
 
-## Cambios específicos de la actividad 10
+- Condiciones de tipo `bool` en `si`, `mientras`, `hacer-mientras` y `para`, conforme a las reglas del subconjunto utilizado desde la actividad 10.
+- Control del contexto de `romper` (`break`) en ciclos y `segun`, y de `continue` en ciclos.
+- Validación de `segun` con expresiones integrales y detección de etiquetas `caso` repetidas.
+- Registro de firmas de métodos con tipos de parámetros y retorno; validación de argumentos suficientes, adicionales o incompatibles.
+- Reconocimiento de sobrecargas mediante listas de tipos de parámetros distintas; detección de firmas duplicadas.
+- Comprobación de compatibilidad de `retornar` con métodos `void` y con retorno, y verificación conservadora de caminos sin retorno obligatorio.
+- Registro de varias clases y detección de duplicados; miembros con `public:`, `private:` y `protected:`. El acceso por objeto se comprueba mediante la sintaxis `objeto.atributo` y `objeto.metodo(...)`.
+- Comprobación de miembro inexistente, miembro no accesible, clase no declarada y variable fuera de ámbito.
+- Ámbitos para bloques anidados y variables de inicialización en `para`.
+- Tabla de símbolos con columna de acceso y resumen final de errores semánticos con línea, columna, token y causa.
 
-| Archivo | Función |
+Las reglas y validaciones de los archivos de las actividades 8, 9 y 10 se conservan.
+
+## Archivos principales
+
+| Archivo | Uso |
 |---|---|
-| `src/ManejoErrores/ManejadorTipos.java` | Representa el tipo y el texto de una expresión; comprueba operadores y compatibilidad. |
-| `src/ManejoErrores/TablaSimbolos.java` | Consulta tipos por ámbito, verifica inicializaciones y asignaciones, impide la modificación de constantes. |
-| `src/ManejoErrores/Simbolo.java` | Permite actualizar el campo textual `valor` en las asignaciones válidas. |
-| `src/ManejoErrores/cmasmas_lexico.cup` | Propaga tipos desde literales e identificadores, aplica comprobaciones en expresiones y condiciones. |
-| `src/ManejoErrores/AnalizadorLexico.java` | Selecciona los archivos de prueba de la actividad 10. |
-| `src/ManejoErrores/ParserJava.java` y `sym.java` | Se regeneran a partir de la gramática actualizada. |
+| `src/ManejoErrores/java_cmasmas.jflex` | Analizador léxico (sin cambios en la actividad 11). |
+| `src/ManejoErrores/cmasmas_lexico.cup` | Gramática y acciones semánticas para control, métodos y clases. |
+| `src/ManejoErrores/TablaSimbolos.java` | Registro de clases, firmas, miembros, ámbitos, búsquedas y diagnósticos. |
+| `src/ManejoErrores/ManejadorTipos.java` | Tipos de expresiones y comprobación de uso de métodos como valores. |
+| `src/ManejoErrores/Simbolo.java` | Entrada individual de la tabla (sin cambios). |
+| `src/ManejoErrores/AnalizadorLexico.java` | Clase principal y selección de pruebas. |
+| `src/ManejoErrores/ParserJava.java` y `sym.java` | Archivos generados por JavaCUP. |
 
-No fue necesario modificar `java_cmasmas.jflex` ni `cppLexer.java`: el léxico ya reconocía los tokens requeridos y sus posiciones.
+## Pruebas de la actividad 11
 
-## Reglas semánticas
-
-- En `+`, `-`, `*` y `/`, los operandos deben ser numéricos. La combinación `int` y `float` produce `float`; `double` mantiene su mayor precisión.
-- El operador `%` exige operandos `int`, conforme al subconjunto C++ analizado.
-- `>`, `<`, `>=` y `<=` comparan números y devuelven `bool`. `==` y `!=` también permiten `bool` con `bool` y `string` con `string`.
-- `&&`, `||` y `!` exigen `bool` y devuelven `bool`.
-- Las inicializaciones y asignaciones comprueban el tipo de destino. Se aceptan asignaciones idénticas y promociones numéricas `int` → `float` / `double`, `float` → `double`; no se permite convertir `string` o `bool` a números.
-- Los identificadores deben existir en la tabla de símbolos y ser visibles desde el ámbito actual. Las constantes pueden leerse pero no reasignarse.
-- Las condiciones de `si`, `mientras` y `para` deben ser `bool`.
-- Los errores indican línea, columna, token y causa. El tipo `ERROR` evita repetir mensajes derivados de una misma expresión incorrecta.
-
-Las expresiones se **verifican y se les infiere tipo**, pero no se evalúa su resultado numérico ni se ejecuta el lenguaje de entrada. La tabla conserva una representación textual del valor o expresión asignada.
-
-## Requisitos y ejecución
-
-- NetBeans con proyecto Java/Ant.
-- Un JDK compatible con `nbproject/project.properties` (la configuración original usa Java 26). Las pruebas de esta entrega se compilaron también con JDK 21 desde la línea de comandos.
-- Bibliotecas `jflex-1.9.1.jar`, `java-cup-11b.jar` y `java-cup-11b-runtime.jar` incluidas en `lib/`.
-
-1. Abrir `AnalizadorSintactico-Cplusplus` como proyecto en NetBeans.
-2. Sustituir los archivos Java y `.cup` de la actividad 9 por los de esta versión.
-3. Ejecutar `GeneradorCupSintantico.java` con **Shift + F6** para regenerar `ParserJava.java` y `sym.java`.
-4. En `AnalizadorLexico.java`, dejar activa la ruta `prueba_valida_a10.txt` o comentar esa línea y activar `prueba_errores_a10.txt`.
-5. Ejecutar **Clean and Build Project** y luego `AnalizadorLexico.java` con **Shift + F6**.
-6. Consultar la consola: reglas `Tipos: ...`, diagnósticos semánticos y tabla final.
-
-## Pruebas y resultados comprobados
-
-| Entrada | Finalidad | Resultado |
+| Archivo | Tipo | Resultado verificado |
 |---|---|---|
-| `prueba_valida_a10.txt` | Declaraciones, asignaciones, promoción, relacionales y lógicas válidas | 10 símbolos, 0 errores semánticos |
-| `prueba_errores_a10.txt` | Asignación incompatible, operador aritmético y lógico incompatibles, condición no booleana, constante, identificador no declarado | 7 símbolos, 6 errores semánticos |
-| `prueba_reglas_a10.txt` | `int + int`, `int * float`, `>=`, `==`, `!=`, `&&`, `||`, `!` y `%` | 14 símbolos, 0 errores semánticos |
-| `prueba_valida_a9.txt` | Regresión de tabla de símbolos | 10 símbolos, 0 errores semánticos |
-| `prueba_valida.txt` | Regresión de métodos y estructuras anteriores | 14 símbolos, 0 errores semánticos |
+| `prueba_valida_a11.txt` | Válida | 20 símbolos, 0 errores semánticos. |
+| `prueba_errores_a11.txt` | Inválida | 20 símbolos, 16 errores semánticos. |
+| `prueba_reglas_a11.txt` | Válida complementaria | 10 símbolos, 0 errores semánticos. |
+| `prueba_adicional_invalida_a11.txt` | Inválida complementaria | 11 símbolos, 9 errores semánticos. |
 
-**Nota sobre los archivos de prueba:** la actividad 9 requiere inicializar las variables locales en su declaración. Los archivos de prueba de la actividad 10 mantienen esa regla, aunque el ejemplo conceptual del PDF contiene variables locales sin valor inicial. En C++ la forma booleana utilizada por el analizador es `bool`, no `boolean`.
+Los archivos válidos de las actividades 8, 9 y 10 siguen reconociéndose sin errores semánticos. Los archivos inválidos de las actividades 9 y 10 continúan reportando sus seis errores respectivos.
 
-## Alcance y limitaciones
+## Cómo ejecutar en NetBeans
 
-Se implementó la verificación solicitada, no un compilador completo de C++. La gramática admite un subconjunto didáctico y no comprueba exhaustivamente firmas de métodos, sobrecargas, conversiones arbitrarias, ejecución de expresiones ni otros aspectos fuera de la actividad 10. El mensaje de finalización sintáctica no significa ausencia de errores semánticos; para comprobarlos, consultar el contador final de la tabla.
+1. Abrir la carpeta `AnalizadorSintactico-Cplusplus` como proyecto Java con Ant (`build.xml`).
+2. Utilizar un JDK compatible con `nbproject/project.properties` (la configuración original define Java 26; las pruebas externas se ejecutaron compilando con Java 21).
+3. Abrir `src/ManejoErrores/GeneradorCupSintantico.java` y ejecutar **Shift + F6** para regenerar `ParserJava.java` y `sym.java` a partir del `.cup` actualizado. JavaCUP debe finalizar con 0 errores y 0 conflictos.
+4. No es necesario regenerar el lexer: `java_cmasmas.jflex` y `cppLexer.java` no cambiaron.
+5. Usar **Clean and Build Project** y ejecutar `AnalizadorLexico.java` con **Shift + F6**.
+6. En esa clase, cambiar la línea `String rutaPrueba = "prueba_valida_a11.txt";` por otro archivo de prueba si es necesario. Las rutas relativas se resuelven desde la raíz del proyecto.
+7. Revisar en la salida el detalle de errores y la tabla de símbolos con el resumen final.
+
+## Alcance del subconjunto
+
+El analizador verifica un subconjunto didáctico de C++, **no compila ni ejecuta** el código de entrada. Se preserva la exigencia de expresiones `bool` en condiciones y la inicialización obligatoria de variables locales establecidas en actividades previas, aunque C++ estándar admite otros comportamientos.
+
+La comprobación de retorno por caminos es conservadora: reconoce secuencias con `retornar` y decisiones `si/sino` cuyos dos bloques garantizan un retorno; no realiza un análisis completo de flujo en todos los ciclos ni evalúa el resultado numérico de las expresiones. La gramática no incluye constructores, herencia, declaraciones adelantadas de métodos ni acceso con puntero `->`; por lo tanto, estas características no se presentan como implementadas. Las comprobaciones de acceso a objetos utilizan miembros ya declarados y pueden distinguir entre visibilidad pública y no pública según el contexto de clase.

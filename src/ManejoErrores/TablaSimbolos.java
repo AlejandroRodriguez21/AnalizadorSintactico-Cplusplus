@@ -1,183 +1,290 @@
-
 package ManejoErrores;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-/** Registro dinamico de identificadores y sus ambitos. */
+/** Tabla dinamica: identificadores, clases, firmas, visibilidad y ambitos. */
 public class TablaSimbolos {
     public static class Referencia {
         public final String id;
-        public final int linea;
-        public final int columna;
-
+        public final int linea, columna;
         public Referencia(String id, int linea, int columna) {
-            this.id = id;
-            this.linea = linea;
-            this.columna = columna;
+            this.id=id; this.linea=linea; this.columna=columna;
         }
     }
-
+    public static class FirmaMetodo {
+        public final String nombre, clase, retorno, acceso;
+        public final int linea, columna;
+        public final List<String> parametros = new ArrayList<>();
+        public FirmaMetodo(String n, String c, String t, String a, int l, int col) {
+            nombre=n; clase=c; retorno=t; acceso=a; linea=l; columna=col;
+        }
+    }
     private final Map<String, Simbolo> simbolos = new LinkedHashMap<>();
+    private final Map<String, String> accesos = new LinkedHashMap<>();
+    private final Map<String, List<FirmaMetodo>> firmas = new LinkedHashMap<>();
     private final Deque<String> ambitos = new ArrayDeque<>();
     private final Deque<Boolean> aperturasBloque = new ArrayDeque<>();
-    private boolean primerBloqueMetodo = false;
-    private int numeroBloque = 0;
-    private int errores = 0;
+    private final Deque<Set<String>> casosSwitch = new ArrayDeque<>();
+    private final Deque<String> tiposSwitch = new ArrayDeque<>();
+    private FirmaMetodo metodoActual;
+    private String claseActual;
+    private String accesoActual="private"; // En class, C++ usa private por defecto.
+    private boolean primerBloqueMetodo=false;
+    private int bloques=0, ciclos=0, errores=0;
 
-    public TablaSimbolos() {
-        ambitos.push("GLOBAL");
-    }
-
-    public String ambitoActual() {
-        return ambitos.peek();
-    }
+    public TablaSimbolos() { ambitos.push("GLOBAL"); }
+    public String ambitoActual() { return ambitos.peek(); }
+    public String claseActual() { return claseActual; }
+    public void cambiarAcceso(String acceso) { accesoActual=acceso; }
 
     public void abrirClase(String id, int linea, int columna) {
-        registrar(id, "CLASE", "void", "N/A", linea, columna);
+        registrar(id,"CLASE",id,"N/A",linea,columna);
+        claseActual=id;
         ambitos.push(id);
+        accesoActual="private";
+    }
+    public void cerrarClase() { ambitos.pop(); claseActual=null; }
+
+    public void abrirMetodo(String nombre, String retorno, int linea, int columna) {
+        String clave=claseActual+"|"+nombre;
+        List<FirmaMetodo> versiones=firmas.computeIfAbsent(clave,k->new ArrayList<>());
+        metodoActual=new FirmaMetodo(nombre,claseActual,retorno,accesoActual,linea,columna);
+        versiones.add(metodoActual);
+        if (simbolos.containsKey(claseActual+"|"+nombre) && versiones.size()==1) {
+            error(linea,columna,nombre,"El nombre del metodo ya pertenece a un atributo de la clase.");
+        }
+        String key=clave+(versiones.size()==1?"":"#"+versiones.size());
+        simbolos.put(key,new Simbolo(nombre,"METODO",retorno,"N/A",claseActual,linea,columna,"IDENTIFICADOR"));
+        accesos.put(key,accesoActual);
+        String scope=claseActual+"."+nombre+(versiones.size()==1?"":"#"+versiones.size());
+        ambitos.push(scope);
+        primerBloqueMetodo=true;
+    }
+    public void registrarParametro(String nombre,String tipo,int linea,int columna) {
+        if(metodoActual!=null) metodoActual.parametros.add(tipo);
+        registrar(nombre,"VARIABLE",tipo,"N/A (Parametro)",linea,columna);
+    }
+    public void finalizarFirma() {
+        if (metodoActual==null) return;
+        List<FirmaMetodo> lista=firmas.get(metodoActual.clase+"|"+metodoActual.nombre);
+        for(FirmaMetodo f:lista) {
+            if(f!=metodoActual && f.parametros.equals(metodoActual.parametros)) {
+                error(metodoActual.linea,metodoActual.columna,metodoActual.nombre,
+                    "Firma duplicada del metodo '"+metodoActual.nombre+"' en la misma clase.");
+                break;
+            }
+        }
+    }
+    public void validarRetorno(ManejadorTipos.Expresion expr,int linea,int columna) {
+        if(metodoActual==null) {
+            error(linea,columna,"retornar","La instruccion retornar debe estar dentro de un metodo.");
+            return;
+        }
+        if(expr==null) {
+            if(!"void".equals(metodoActual.retorno))
+                error(linea,columna,"retornar","El metodo '"+metodoActual.nombre+"' debe devolver '"+metodoActual.retorno+"'.");
+        } else if("void".equals(metodoActual.retorno)) {
+            error(linea,columna,"retornar","El metodo void '"+metodoActual.nombre+"' no debe devolver un valor.");
+        } else if(!"ERROR".equals(expr.tipo) && !ManejadorTipos.asignable(metodoActual.retorno,expr.tipo)) {
+            error(linea,columna,"retornar","Retorno incompatible en '"+metodoActual.nombre+"': se esperaba '"+
+                metodoActual.retorno+"' y se obtuvo '"+expr.tipo+"'.");
+        }
+    }
+    public boolean retornoValido(ManejadorTipos.Expresion expr) {
+        // Un return escrito cubre ese camino; su incompatibilidad ya se reporto.
+        return metodoActual!=null;
+    }
+    public void cerrarMetodo(boolean retorna) {
+        if(metodoActual!=null && !"void".equals(metodoActual.retorno) && !retorna)
+            error(metodoActual.linea,metodoActual.columna,metodoActual.nombre,
+                "El metodo '"+metodoActual.nombre+"' requiere retorno valido en todos los caminos de ejecucion.");
+        ambitos.pop(); primerBloqueMetodo=false; metodoActual=null;
     }
 
-    public void cerrarClase() {
-        ambitos.pop();
+    public ManejadorTipos.Expresion llamarMetodo(String objeto,String nombre,
+            List<ManejadorTipos.Expresion> args,int linea,int columna) {
+        String clase=claseActual;
+        if(objeto!=null) {
+            Simbolo o=buscarObjeto(objeto,linea,columna);
+            if(o==null) return ManejadorTipos.literal("ERROR",objeto+"."+nombre+"(...)");
+            clase=o.tipodato;
+        }
+        List<FirmaMetodo> candidatos=firmas.get(clase+"|"+nombre);
+        String llamada=(objeto==null?"":objeto+".")+nombre+"(...)";
+        if(candidatos==null || candidatos.isEmpty()) {
+            error(linea,columna,nombre,"El metodo '"+nombre+"' no esta declarado en la clase '"+clase+"'.");
+            return ManejadorTipos.literal("ERROR",llamada);
+        }
+        List<FirmaMetodo> visibles=new ArrayList<>();
+        for(FirmaMetodo f:candidatos) {
+            if(objeto==null || claseActual!=null && claseActual.equals(f.clase) || "public".equals(f.acceso))
+                visibles.add(f);
+        }
+        if(visibles.isEmpty()) {
+            error(linea,columna,nombre,"El metodo '"+nombre+"' no es visible ("+candidatos.get(0).acceso+").");
+            return ManejadorTipos.literal("ERROR",llamada);
+        }
+        for(FirmaMetodo f:visibles) {
+            if(f.parametros.size()!=args.size()) continue;
+            boolean compatible=true;
+            for(int i=0;i<args.size();i++) {
+                if(!ManejadorTipos.asignable(f.parametros.get(i),args.get(i).tipo)) compatible=false;
+            }
+            if(compatible) return ManejadorTipos.literal(f.retorno,llamada);
+        }
+        FirmaMetodo f=visibles.get(0);
+        if(f.parametros.size()!=args.size()) {
+            error(linea,columna,nombre,"El metodo '"+nombre+"' requiere "+f.parametros.size()+
+                " argumentos, pero se proporcionaron "+args.size()+".");
+        } else {
+            for(int i=0;i<args.size();i++) {
+                if(!"ERROR".equals(args.get(i).tipo) && !ManejadorTipos.asignable(f.parametros.get(i),args.get(i).tipo)) {
+                    error(linea,columna,nombre,"Argumento "+(i+1)+" de '"+nombre+"' incompatible: se esperaba '"+
+                        f.parametros.get(i)+"' y se obtuvo '"+args.get(i).tipo+"'.");
+                    break;
+                }
+            }
+        }
+        return ManejadorTipos.literal("ERROR",llamada);
     }
-
-    public void abrirMetodo(String id, String tipo, int linea, int columna) {
-        registrar(id, "METODO", tipo, "N/A", linea, columna);
-        ambitos.push(ambitoActual() + "." + id);
-        primerBloqueMetodo = true;
+    private Simbolo buscarObjeto(String nombre,int linea,int columna) {
+        if("this".equals(nombre)) {
+            if(claseActual!=null) return new Simbolo("this","VARIABLE",claseActual,"N/A",ambitoActual(),linea,columna,"THIS");
+            error(linea,columna,nombre,"'this' no esta disponible fuera de una clase.");
+            return null;
+        }
+        Simbolo s=buscarUso(nombre,linea,columna);
+        if(s!=null && !simbolos.containsKey("GLOBAL|"+s.tipodato)) {
+            error(linea,columna,nombre,"El identificador '"+nombre+"' no es un objeto de clase declarada.");
+            return null;
+        }
+        return s;
     }
-
-    public void cerrarMetodo() {
-        ambitos.pop();
-        primerBloqueMetodo = false;
+    public ManejadorTipos.Expresion accederAtributo(String obj,String miembro,int linea,int columna) {
+        Simbolo o=buscarObjeto(obj,linea,columna);
+        if(o==null) return ManejadorTipos.literal("ERROR",obj+"."+miembro);
+        String clave=o.tipodato+"|"+miembro;
+        Simbolo s=simbolos.get(clave);
+        if(s==null || "METODO".equals(s.tiposimbolo)) {
+            error(linea,columna,miembro,"El atributo '"+miembro+"' no existe en la clase '"+o.tipodato+"'.");
+            return ManejadorTipos.literal("ERROR",obj+"."+miembro);
+        }
+        if(!o.tipodato.equals(claseActual) && !"public".equals(accesos.get(clave))) {
+            error(linea,columna,miembro,"No se permite acceder al atributo '"+miembro+"' ("+accesos.get(clave)+").");
+            return ManejadorTipos.literal("ERROR",obj+"."+miembro);
+        }
+        return ManejadorTipos.literal(s.tipodato,obj+"."+miembro);
+    }
+    public void asignarAtributo(String obj,String miembro,ManejadorTipos.Expresion valor,int l,int c) {
+        ManejadorTipos.Expresion acceso=accederAtributo(obj,miembro,l,c);
+        if("ERROR".equals(acceso.tipo) || "ERROR".equals(valor.tipo)) return;
+        Simbolo objeto="this".equals(obj) ? null : buscarUso(obj,l,c);
+        String clase="this".equals(obj) ? claseActual : objeto.tipodato;
+        Simbolo destino=simbolos.get(clase+"|"+miembro);
+        if("CONSTANTE".equals(destino.tiposimbolo)) {
+            error(l,c,miembro,"No se puede reasignar la constante '"+miembro+"'."); return;
+        }
+        if(!ManejadorTipos.asignable(destino.tipodato,valor.tipo)) {
+            error(l,c,miembro,"Incompatibilidad al asignar a '"+miembro+"': '"+
+                valor.tipo+"' no es compatible con '"+destino.tipodato+"'."); return;
+        }
+        destino.valor=valor.texto;
+    }
+    public void registrarObjeto(String clase,String nombre,int linea,int columna) {
+        if(!simbolos.containsKey("GLOBAL|"+clase)) {
+            error(linea,columna,clase,"La clase '"+clase+"' no esta declarada.");
+            return;
+        }
+        registrar(nombre,"VARIABLE",clase,"N/A (Objeto)",linea,columna);
     }
 
     public void abrirBloque() {
-        if (primerBloqueMetodo) {
-            primerBloqueMetodo = false;
-            aperturasBloque.push(false);
-        } else {
-            ambitos.push(ambitoActual() + ".bloque" + (++numeroBloque));
-            aperturasBloque.push(true);
-        }
+        if(primerBloqueMetodo) { primerBloqueMetodo=false; aperturasBloque.push(false); }
+        else { ambitos.push(ambitoActual()+".bloque"+(++bloques)); aperturasBloque.push(true); }
     }
-
-    public void cerrarBloque() {
-        if (aperturasBloque.pop()) {
-            ambitos.pop();
-        }
+    public void cerrarBloque() { if(aperturasBloque.pop()) ambitos.pop(); }
+    public void abrirCiclo() { ciclos++; }
+    public void cerrarCiclo() { ciclos--; }
+    public void abrirFor() { ambitos.push(ambitoActual()+".for"+(++bloques)); ciclos++; }
+    public void cerrarFor() { ciclos--; ambitos.pop(); }
+    public void validarBreak(int l,int c) {
+        if(ciclos==0 && casosSwitch.isEmpty()) error(l,c,"romper","La instruccion romper solo se permite dentro de ciclo o segun.");
     }
+    public void validarContinue(int l,int c) {
+        if(ciclos==0) error(l,c,"continue","La instruccion continue solo se permite dentro de un ciclo.");
+    }
+    public void abrirSwitch(ManejadorTipos.Expresion exp,int l,int c) {
+        if(!"ERROR".equals(exp.tipo) && !"int".equals(exp.tipo) && !"char".equals(exp.tipo))
+            error(l,c,"segun","La expresion de segun debe ser integral y se obtuvo '"+exp.tipo+"'.");
+        casosSwitch.push(new HashSet<>());
+        tiposSwitch.push(exp.tipo);
+    }
+    public void registrarCaso(String valor,int l,int c) {
+        if(!tiposSwitch.isEmpty() && "int".equals(tiposSwitch.peek()) && !valor.matches("[0-9]+"))
+            error(l,c,"caso","La etiqueta case debe ser una constante entera compatible con segun.");
+        if(!casosSwitch.isEmpty() && !casosSwitch.peek().add(valor))
+            error(l,c,"caso","Etiqueta de caso duplicada: "+valor+".");
+    }
+    public void cerrarSwitch() { casosSwitch.pop(); tiposSwitch.pop(); }
 
-    public void registrar(String id, String categoria, String tipo,
-                         String valor, int linea, int columna) {
-        if (categoria.equals("CLASE")) {
-            if (!id.matches("[A-Z][a-zA-Z0-9]*")) {
-                error(linea, columna, "La clase '" + id + "' debe usar PascalCase.");
-            }
-        } else if (categoria.equals("CONSTANTE")) {
-            if (!id.matches("[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*")
-                    && !id.matches("[a-z][a-zA-Z0-9]*")) {
-                error(linea, columna, "La constante '" + id + "' debe usar SNAKE_CASE o camelCase.");
-            }
-        } else if (!id.matches("[a-z][a-zA-Z0-9]*")) {
-            error(linea, columna, "El identificador '" + id + "' de "
-                    + categoria.toLowerCase() + " debe usar camelCase.");
-        }
-
-        String clave = ambitoActual() + "|" + id;
-
-        if (simbolos.containsKey(clave)) {
-            error(linea, columna, "El identificador '" + id
-                    + "' ya fue declarado en el ambito '" + ambitoActual() + "'.");
+    public void registrar(String id,String categoria,String tipo,String valor,int linea,int columna) {
+        if("CLASE".equals(categoria)) {
+            if(!id.matches("[A-Z][a-zA-Z0-9]*")) error(linea,columna,id,"La clase '"+id+"' debe usar PascalCase.");
+        } else if("CONSTANTE".equals(categoria)) {
+            if(!id.matches("[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*") && !id.matches("[a-z][a-zA-Z0-9]*"))
+                error(linea,columna,id,"La constante '"+id+"' debe usar SNAKE_CASE o camelCase.");
+        } else if(!id.matches("[a-z][a-zA-Z0-9]*"))
+            error(linea,columna,id,"El identificador '"+id+"' debe usar camelCase.");
+        String clave=ambitoActual()+"|"+id;
+        if(simbolos.containsKey(clave)) {
+            error(linea,columna,id,"El identificador '"+id+"' ya fue declarado en el ambito '"+ambitoActual()+"'.");
             return;
         }
-
-        simbolos.put(clave, new Simbolo(id, categoria, tipo, valor,
-                ambitoActual(), linea, columna, "IDENTIFICADOR"));
+        simbolos.put(clave,new Simbolo(id,categoria,tipo,valor,ambitoActual(),linea,columna,"IDENTIFICADOR"));
+        accesos.put(clave,claseActual!=null && metodoActual==null?accesoActual:"local");
     }
-
-    public Simbolo buscarUso(String id, int linea, int columna) {
-        for (String ambito : ambitos) {
-            Simbolo encontrado = simbolos.get(ambito + "|" + id);
-            if (encontrado != null) return encontrado;
+    public Simbolo buscarUso(String id,int l,int c) {
+        for(String a:ambitos) {
+            Simbolo s=simbolos.get(a+"|"+id);
+            if(s!=null) return s;
         }
-
-        error(linea, columna, id, "El identificador '" + id
-                + "' NO ha sido declarado en el ambito '" + ambitoActual() + "'.");
+        error(l,c,id,"El identificador '"+id+"' NO ha sido declarado o esta fuera de ambito.");
         return null;
     }
-
-    public void verificarUso(String id, int linea, int columna) {
-        buscarUso(id, linea, columna);
-    }
-
-    /** Valida una asignacion y actualiza el valor textual si es compatible. */
-    public void asignar(String id, ManejadorTipos.Expresion expresion, int linea, int columna) {
-        Simbolo destino = buscarUso(id, linea, columna);
-        if (destino == null) return;
-
-        if ("CONSTANTE".equals(destino.tiposimbolo)) {
-            error(linea, columna, id,
-                    "No se puede reasignar un valor a la constante '" + id + "'.");
-            return;
+    public void verificarUso(String id,int l,int c) { buscarUso(id,l,c); }
+    public void asignar(String id,ManejadorTipos.Expresion exp,int l,int c) {
+        Simbolo s=buscarUso(id,l,c);
+        if(s==null) return;
+        if("CONSTANTE".equals(s.tiposimbolo)) { error(l,c,id,"No se puede reasignar la constante '"+id+"'."); return; }
+        if("ERROR".equals(exp.tipo)) return;
+        if(!ManejadorTipos.asignable(s.tipodato,exp.tipo)) {
+            error(l,c,id,"Incompatibilidad de tipos: '"+exp.tipo+"' no se puede asignar a '"+s.tipodato+"'."); return;
         }
-
-        if ("ERROR".equals(expresion.tipo)) return;
-
-        if (!ManejadorTipos.asignable(destino.tipodato, expresion.tipo)) {
-            error(linea, columna, id,
-                    "Incompatibilidad de tipos: no se puede asignar '"
-                    + expresion.tipo + "' a '" + destino.tipodato + "' (" + id + ").");
-            return;
-        }
-
-        destino.valor = expresion.texto;
+        s.valor=exp.texto;
     }
-
-    /** Comprueba el tipo de una inicializacion antes de registrar el simbolo. */
-    public void validarInicializacion(String id, String tipo,
-            ManejadorTipos.Expresion expresion, int linea, int columna) {
-        if (!"ERROR".equals(expresion.tipo)
-                && !ManejadorTipos.asignable(tipo, expresion.tipo)) {
-            error(linea, columna, id,
-                    "Incompatibilidad de tipos: no se puede inicializar '"
-                    + id + "' de tipo '" + tipo + "' con '" + expresion.tipo + "'.");
-        }
+    public void validarInicializacion(String id,String tipo,ManejadorTipos.Expresion exp,int l,int c) {
+        if(!"ERROR".equals(exp.tipo) && !ManejadorTipos.asignable(tipo,exp.tipo))
+            error(l,c,id,"Incompatibilidad de tipos al inicializar '"+id+"': '"+exp.tipo+"' a '"+tipo+"'.");
     }
-
-    public void error(int linea, int columna, String motivo) {
+    public void error(int l,int c,String motivo) { error(l,c,"?",motivo); }
+    public void error(int l,int c,String token,String motivo) {
         errores++;
-        System.err.println("Error semantico en linea " + linea
-                + ", columna " + columna + ": " + motivo);
+        System.err.println("Error semantico en linea "+l+", columna "+c+", token '"+token+"': "+motivo);
     }
-
-    public void error(int linea, int columna, String token, String motivo) {
-        errores++;
-        System.err.println("Error semantico en linea " + linea + ", columna " + columna
-                + ", token '" + token + "': " + motivo);
-    }
-
-    public int getErrores() {
-        return errores;
-    }
-
+    public int getErrores() { return errores; }
     public void imprimir() {
-        System.out.println("\n========================= TABLA DE SIMBOLOS =========================");
-        System.out.printf("%-20s %-11s %-10s %-18s %-29s %5s %7s %s%n",
-                "ID", "Categoria", "Tipo", "Valor", "Ambito", "Linea", "Columna", "Token");
-        System.out.println("-----------------------------------------------------------------------------------------------");
-
-        for (Simbolo s : simbolos.values()) {
-            System.out.printf("%-20s %-11s %-10s %-18s %-29s %5d %7d %s%n",
-                    s.id, s.tiposimbolo, s.tipodato, s.valor, s.ambito,
-                    s.linea, s.columna, s.token);
+        System.out.println("\n=================== TABLA DE SIMBOLOS ===================");
+        System.out.printf("%-20s %-10s %-10s %-19s %-34s %-8s %5s %7s %s%n",
+            "ID","Categoria","Tipo","Valor","Ambito","Acceso","Linea","Columna","Token");
+        for(Map.Entry<String,Simbolo> e:simbolos.entrySet()) {
+            Simbolo s=e.getValue();
+            System.out.printf("%-20s %-10s %-10s %-19s %-34s %-8s %5d %7d %s%n",
+                s.id,s.tiposimbolo,s.tipodato,s.valor,s.ambito,
+                accesos.getOrDefault(e.getKey(),"-"),s.linea,s.columna,s.token);
         }
-
-        System.out.println("Total de simbolos registrados: " + simbolos.size());
-        System.out.println("Total de errores semanticos: " + errores);
-        System.out.println("=====================================================================\n");
+        System.out.println("Total de simbolos registrados: "+simbolos.size());
+        System.out.println("Total de errores semanticos: "+errores);
+        System.out.println("Resultado semantico: "+(errores==0?"SIN ERRORES":"CON ERRORES"));
+        System.out.println("=========================================================\n");
     }
 }

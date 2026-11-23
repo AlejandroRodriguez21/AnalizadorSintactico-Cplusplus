@@ -10,8 +10,8 @@ public class AnalizadorLexico {
     public static void main(String[] args) {
         System.out.println("CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO");
 
-        // String rutaPrueba = "prueba_valida_a10.txt";
-        String rutaPrueba = "prueba_errores_a10.txt";
+        String rutaPrueba = "prueba_valida_a11.txt";
+        // String rutaPrueba = "prueba_errores_a11.txt";
 
         try (Reader lector = new BufferedReader(new FileReader(rutaPrueba))) {
             System.out.println("Archivo analizado: " + rutaPrueba);
