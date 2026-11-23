@@ -1,3 +1,5 @@
+
+/* CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO */
 package ManejoErrores;
 
 import java.util.*;
@@ -20,6 +22,8 @@ public class TablaSimbolos {
         }
     }
     private final Map<String, Simbolo> simbolos = new LinkedHashMap<>();
+    private final CodigoIntermedio codigoIntermedio = new CodigoIntermedio();
+    public CodigoIntermedio getCodigoIntermedio() { return codigoIntermedio; }
     private final Map<String, String> accesos = new LinkedHashMap<>();
     private final Map<String, List<FirmaMetodo>> firmas = new LinkedHashMap<>();
     private final Deque<String> ambitos = new ArrayDeque<>();
@@ -130,7 +134,7 @@ public class TablaSimbolos {
             for(int i=0;i<args.size();i++) {
                 if(!ManejadorTipos.asignable(f.parametros.get(i),args.get(i).tipo)) compatible=false;
             }
-            if(compatible) return ManejadorTipos.literal(f.retorno,llamada);
+            if(compatible) return ManejadorTipos.llamada(f.retorno,llamada);
         }
         FirmaMetodo f=visibles.get(0);
         if(f.parametros.size()!=args.size()) {
@@ -173,7 +177,7 @@ public class TablaSimbolos {
             error(linea,columna,miembro,"No se permite acceder al atributo '"+miembro+"' ("+accesos.get(clave)+").");
             return ManejadorTipos.literal("ERROR",obj+"."+miembro);
         }
-        return ManejadorTipos.literal(s.tipodato,obj+"."+miembro);
+        return ManejadorTipos.referencia(s.tipodato,obj+"."+miembro);
     }
     public void asignarAtributo(String obj,String miembro,ManejadorTipos.Expresion valor,int l,int c) {
         ManejadorTipos.Expresion acceso=accederAtributo(obj,miembro,l,c);
@@ -189,6 +193,7 @@ public class TablaSimbolos {
                 valor.tipo+"' no es compatible con '"+destino.tipodato+"'."); return;
         }
         destino.valor=valor.texto;
+        codigoIntermedio.asignar(obj + "." + miembro, valor);
     }
     public void registrarObjeto(String clase,String nombre,int linea,int columna) {
         if(!simbolos.containsKey("GLOBAL|"+clase)) {
@@ -261,10 +266,22 @@ public class TablaSimbolos {
             error(l,c,id,"Incompatibilidad de tipos: '"+exp.tipo+"' no se puede asignar a '"+s.tipodato+"'."); return;
         }
         s.valor=exp.texto;
+        codigoIntermedio.asignar(id, exp);
     }
     public void validarInicializacion(String id,String tipo,ManejadorTipos.Expresion exp,int l,int c) {
         if(!"ERROR".equals(exp.tipo) && !ManejadorTipos.asignable(tipo,exp.tipo))
             error(l,c,id,"Incompatibilidad de tipos al inicializar '"+id+"': '"+exp.tipo+"' a '"+tipo+"'.");
+    }
+    /** Inicializa un simbolo y genera 3AC solo cuando la declaracion es valida. */
+    public void registrarInicializado(String id, String categoria, String tipo,
+            ManejadorTipos.Expresion exp, int linea, int columna) {
+        int erroresAntes = errores;
+        boolean duplicado = simbolos.containsKey(ambitoActual() + "|" + id);
+        validarInicializacion(id, tipo, exp, linea, columna);
+        registrar(id, categoria, tipo, exp.texto, linea, columna);
+        if (!duplicado && errores == erroresAntes && !"ERROR".equals(exp.tipo)) {
+            codigoIntermedio.asignar(id, exp);
+        }
     }
     public void error(int l,int c,String motivo) { error(l,c,"?",motivo); }
     public void error(int l,int c,String token,String motivo) {

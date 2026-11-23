@@ -10,8 +10,8 @@ public class AnalizadorLexico {
     public static void main(String[] args) {
         System.out.println("CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO");
 
-        String rutaPrueba = "prueba_valida_a11.txt";
-        // String rutaPrueba = "prueba_errores_a11.txt";
+        String rutaPrueba = "prueba_valida_a12.txt";
+        // String rutaPrueba = "prueba_errores_a12.txt";
 
         try (Reader lector = new BufferedReader(new FileReader(rutaPrueba))) {
             System.out.println("Archivo analizado: " + rutaPrueba);
@@ -20,6 +20,7 @@ public class AnalizadorLexico {
             ParserJava parser = new ParserJava(lexer);
             parser.parse();
             parser.getTablaSimbolos().imprimir();
+            parser.getTablaSimbolos().getCodigoIntermedio().imprimir();
         } catch (Exception ex) {
             System.err.println("El analisis se detuvo por un error irrecuperable: " + ex.getMessage());
         }

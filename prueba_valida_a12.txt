@@ -1,0 +1,24 @@
+
+class OperacionesIntermedias {
+    int a = 5;
+    int b = 10;
+    int c = 2;
+    int d = 1;
+    bool activo = verdadero;
+
+    void ejecutar() {
+        int suma = 0;
+        suma = a + b;
+        int producto = 0;
+        producto = a * (b + c);
+        int total = 0;
+        total = (a + b) * (c - d);
+        float cociente = 0.0;
+        cociente = (a + b) / (c - d);
+        bool bandera = falso;
+        bandera = (a > b) && (suma < 10);
+        bandera = !(a == b) || activo;
+        int divisionVariable = 0;
+        divisionVariable = total / c;
+    }
+}

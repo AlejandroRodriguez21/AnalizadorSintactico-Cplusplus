@@ -1,3 +1,4 @@
+
 /* CENTENO DOMINGUEZ EDGAR YAIR, RAMOS GUTIERREZ RODRIGO, RODRIGUEZ ROMERO ALEJANDRO */
 package ManejoErrores;
 import java_cup.runtime.*;
@@ -230,9 +231,7 @@ escritura ::= ESCRIBIR PARENTESIS_A lista_elementos PARENTESIS_C PUNTO_COMA ;
 
 /* Las variables locales requieren inicializacion; los atributos no. */
 dec_var_local ::= tipo_dato:t IDENTIFICADOR:n IGUAL expresion:v PUNTO_COMA
-                {: parser.getTablaSimbolos().validarInicializacion(n, t, v,
-                         nleft + 1, nright + 1);
-                   parser.getTablaSimbolos().registrar(n, "VARIABLE", t, v.texto,
+                {: parser.getTablaSimbolos().registrarInicializado(n, "VARIABLE", t, v,
                          nleft + 1, nright + 1); :}
               | tipo_dato:t IDENTIFICADOR:n PUNTO_COMA
                 {: parser.getTablaSimbolos().error(nleft + 1, nright + 1,
@@ -275,7 +274,7 @@ expresion ::= expresion:a MAS:op expresion:b
             | expresion:a DISTINTO:op expresion:b
             {: RESULT = ManejadorTipos.relacional(parser.getTablaSimbolos(), "!=", a, b, opleft + 1, opright + 1); :}
             | PARENTESIS_A expresion:e PARENTESIS_C
-            {: RESULT = ManejadorTipos.literal(e.tipo, "(" + e.texto + ")"); :}
+            {: RESULT = ManejadorTipos.agrupar(e); :}
             | IDENTIFICADOR:obj PUNTO IDENTIFICADOR:n
             {: RESULT = parser.getTablaSimbolos().accederAtributo(obj,n,nleft+1,nright+1); :}
             | IDENTIFICADOR:n
@@ -315,13 +314,11 @@ atributo_variable ::= tipo_dato:t lista_identificadores:ids PUNTO_COMA
               | tipo_dato:t lista_identificadores:ids IGUAL expresion:v PUNTO_COMA
               {: for (Object obj : ids) {
                      TablaSimbolos.Referencia r = (TablaSimbolos.Referencia) obj;
-                     parser.getTablaSimbolos().validarInicializacion(r.id, t, v, r.linea, r.columna);
-                     parser.getTablaSimbolos().registrar(r.id, "ATRIBUTO", t,
-                         v.texto, r.linea, r.columna);
+                     parser.getTablaSimbolos().registrarInicializado(r.id, "ATRIBUTO", t, v,
+                         r.linea, r.columna);
                  } :} ;
 constante ::= CONST tipo_dato:t IDENTIFICADOR:n IGUAL expresion:v PUNTO_COMA
-            {: parser.getTablaSimbolos().validarInicializacion(n, t, v, nleft + 1, nright + 1);
-               parser.getTablaSimbolos().registrar(n, "CONSTANTE", t, v.texto,
+            {: parser.getTablaSimbolos().registrarInicializado(n, "CONSTANTE", t, v,
                        nleft + 1, nright + 1); :}
           | CONST tipo_dato:t IDENTIFICADOR:n PUNTO_COMA
             {: parser.getTablaSimbolos().error(nleft + 1, nright + 1,

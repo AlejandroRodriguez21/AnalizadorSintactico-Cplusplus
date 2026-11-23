@@ -1,0 +1,15 @@
+
+class OperacionesErroneas {
+    int a = 5;
+    bool activo = verdadero;
+
+    void ejecutar() {
+        int resultado = 0;
+        resultado = a / 0;
+        resultado = activo + 3;
+        resultado = a + "texto";
+        resultado = a % 0;
+        resultado = variableNoDeclarada + 1;
+        resultado = a / (a - 1);
+    }
+}

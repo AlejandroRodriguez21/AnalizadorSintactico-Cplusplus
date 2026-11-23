@@ -1902,9 +1902,7 @@ class CUP$ParserJava$actions {
 		int vleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).left;
 		int vright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).right;
 		ManejoErrores.ManejadorTipos.Expresion v = (ManejoErrores.ManejadorTipos.Expresion)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).value;
-		 parser.getTablaSimbolos().validarInicializacion(n, t, v,
-                         nleft + 1, nright + 1);
-                   parser.getTablaSimbolos().registrar(n, "VARIABLE", t, v.texto,
+		 parser.getTablaSimbolos().registrarInicializado(n, "VARIABLE", t, v,
                          nleft + 1, nright + 1); 
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("dec_var_local",38, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
@@ -2235,7 +2233,7 @@ class CUP$ParserJava$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).right;
 		ManejoErrores.ManejadorTipos.Expresion e = (ManejoErrores.ManejadorTipos.Expresion)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).value;
-		 RESULT = ManejadorTipos.literal(e.tipo, "(" + e.texto + ")"); 
+		 RESULT = ManejadorTipos.agrupar(e); 
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("expresion",15, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-2)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
           return CUP$ParserJava$result;
@@ -2505,9 +2503,8 @@ class CUP$ParserJava$actions {
 		ManejoErrores.ManejadorTipos.Expresion v = (ManejoErrores.ManejadorTipos.Expresion)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).value;
 		 for (Object obj : ids) {
                      TablaSimbolos.Referencia r = (TablaSimbolos.Referencia) obj;
-                     parser.getTablaSimbolos().validarInicializacion(r.id, t, v, r.linea, r.columna);
-                     parser.getTablaSimbolos().registrar(r.id, "ATRIBUTO", t,
-                         v.texto, r.linea, r.columna);
+                     parser.getTablaSimbolos().registrarInicializado(r.id, "ATRIBUTO", t, v,
+                         r.linea, r.columna);
                  } 
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("atributo_variable",11, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-4)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
@@ -2526,8 +2523,7 @@ class CUP$ParserJava$actions {
 		int vleft = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).left;
 		int vright = ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).right;
 		ManejoErrores.ManejadorTipos.Expresion v = (ManejoErrores.ManejadorTipos.Expresion)((java_cup.runtime.Symbol) CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-1)).value;
-		 parser.getTablaSimbolos().validarInicializacion(n, t, v, nleft + 1, nright + 1);
-               parser.getTablaSimbolos().registrar(n, "CONSTANTE", t, v.texto,
+		 parser.getTablaSimbolos().registrarInicializado(n, "CONSTANTE", t, v,
                        nleft + 1, nright + 1); 
               CUP$ParserJava$result = parser.getSymbolFactory().newSymbol("constante",12, ((java_cup.runtime.Symbol)CUP$ParserJava$stack.elementAt(CUP$ParserJava$top-5)), ((java_cup.runtime.Symbol)CUP$ParserJava$stack.peek()), RESULT);
             }
